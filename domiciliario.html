@@ -102,6 +102,8 @@
         .badge.pendiente { background-color: var(--gray); }
         .badge.entregado_completo { background-color: var(--green); }
         .badge.entregado_parcial { background-color: var(--yellow); color: #333; }
+        .badge.debe { background-color: #E67E22; }
+        .badge.devuelto { background-color: #2980B9; }
 
         .remision-title {
             font-size: 26px;
@@ -332,9 +334,10 @@ const formatTime = (isoString) => {
 
 const getTodayRange = () => {
     const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0).toISOString();
-    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999).toISOString();
-    return { start, end };
+    const offset = now.getTimezoneOffset();
+    const localDate = new Date(now.getTime() - (offset * 60 * 1000));
+    const fecha = localDate.toISOString().split('T')[0];
+    return { start: `${fecha}T00:00:00`, end: `${fecha}T23:59:59` };
 };
 </script>
 
@@ -383,6 +386,10 @@ const getTodayRange = () => {
                 <input type="radio" name="pago_status" id="radio-nopago" onchange="handleRadioChange()">
                 🔴 No pagó
             </label>
+            <label class="radio-option">
+                <input type="radio" name="pago_status" id="radio-devuelto" onchange="handleRadioChange()">
+                🔵 Devuelto
+            </label>
         </div>
 
         <div class="form-group" id="block-valor" style="display: none;">
@@ -396,6 +403,11 @@ const getTodayRange = () => {
             <select id="select-metodo">
                 <!-- Opciones se llenan en JS -->
             </select>
+        </div>
+
+        <div class="form-group" id="block-devolucion" style="display: none;">
+            <label>Motivo de devolución (Opcional)</label>
+            <input type="text" id="input-devolucion" placeholder="Ej. Cliente no estaba">
         </div>
 
         <button class="btn-primary" id="btn-confirm" onclick="confirmDelivery()" style="margin-top: 10px;">Confirmar</button>
@@ -514,9 +526,11 @@ const getTodayRange = () => {
         const isCompleto = document.getElementById('radio-completo').checked;
         const isParcial = document.getElementById('radio-parcial').checked;
         const isNoPago = document.getElementById('radio-nopago').checked;
+        const isDevuelto = document.getElementById('radio-devuelto').checked;
 
         const blockValor = document.getElementById('block-valor');
         const blockMetodo = document.getElementById('block-metodo');
+        const blockDevolucion = document.getElementById('block-devolucion');
         const selectMetodo = document.getElementById('select-metodo');
         const inputValor = document.getElementById('input-valor');
         const debtText = document.getElementById('debt-text');
@@ -524,12 +538,14 @@ const getTodayRange = () => {
         if(isCompleto) {
             blockValor.style.display = 'none';
             blockMetodo.style.display = 'block';
+            blockDevolucion.style.display = 'none';
             selectMetodo.innerHTML = '<option value="Efectivo">Efectivo</option><option value="Nequi">Nequi</option><option value="Transferencia">Transferencia</option><option value="Debe">Debe</option>';
             selectMetodo.disabled = false;
             selectMetodo.value = 'Efectivo';
         } else if(isParcial) {
             blockValor.style.display = 'block';
             blockMetodo.style.display = 'block';
+            blockDevolucion.style.display = 'none';
             inputValor.value = '';
             debtText.textContent = `Deuda: ${formatCOP(currentPedido.valor_pedido)}`;
             selectMetodo.innerHTML = '<option value="Efectivo">Efectivo</option><option value="Nequi">Nequi</option><option value="Transferencia">Transferencia</option><option value="Debe">Debe</option>';
@@ -539,8 +555,13 @@ const getTodayRange = () => {
         } else if(isNoPago) {
             blockValor.style.display = 'none';
             blockMetodo.style.display = 'block';
+            blockDevolucion.style.display = 'none';
             selectMetodo.innerHTML = '<option value="Debe">Debe</option>';
             selectMetodo.disabled = true;
+        } else if(isDevuelto) {
+            blockValor.style.display = 'none';
+            blockMetodo.style.display = 'none';
+            blockDevolucion.style.display = 'block';
         }
     }
 
@@ -554,6 +575,7 @@ const getTodayRange = () => {
         const isCompleto = document.getElementById('radio-completo').checked;
         const isParcial = document.getElementById('radio-parcial').checked;
         const isNoPago = document.getElementById('radio-nopago').checked;
+        const isDevuelto = document.getElementById('radio-devuelto').checked;
         const errDiv = document.getElementById('modal_error');
         errDiv.style.display = 'none';
 
@@ -588,8 +610,12 @@ const getTodayRange = () => {
                 newState = 'entregado_completo';
             }
         } else if(isNoPago) {
-            newState = 'entregado_parcial';
+            newState = 'debe';
             newMetodo = 'Debe';
+            newValorPagado = 0;
+        } else if(isDevuelto) {
+            newState = 'devuelto';
+            newMetodo = 'devuelto';
             newValorPagado = 0;
         }
 

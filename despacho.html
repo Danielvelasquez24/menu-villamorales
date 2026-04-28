@@ -212,6 +212,8 @@
         .badge.pendiente { background-color: var(--gray); }
         .badge.entregado_completo { background-color: var(--green); }
         .badge.entregado_parcial { background-color: var(--yellow); }
+        .badge.debe { background-color: #E67E22; }
+        .badge.devuelto { background-color: #2980B9; }
 
         .group-header { font-weight: 700; color: var(--brown); border-bottom: 2px solid var(--brown); padding-bottom: 4px; margin: 20px 0 10px 0; font-size: 15px; }
         .history-item { border: 1px solid #f0f0f0; border-radius: 8px; padding: 12px; margin-bottom: 10px; background-color: #fafafa; }
@@ -279,7 +281,7 @@
 
 const SUPABASE_URL = 'https://odurfgozvbyxlormjool.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kdXJmZ296dmJ5eGxvcm1qb29sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNDI4OTYsImV4cCI6MjA5MjkxODg5Nn0.k1s68t8fBmk2ECWuRDGTXN8MXlRbdqrnb7y4f5SqDOg';
-const BASE_URL = 'https://danielvelasquez24.github.io/menu-villamorales/domiciliario.html';
+const BASE_URL = 'https://granjavillamorales.com/domiciliario.html';
 
 const getHeaders = {
     'apikey': SUPABASE_KEY,
@@ -327,9 +329,10 @@ async function copyToClipboard(text) {
 // Helper para Fechas Locales
 const getTodayRange = () => {
     const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-    return { start: start.toISOString(), end: end.toISOString() };
+    const offset = now.getTimezoneOffset();
+    const localDate = new Date(now.getTime() - (offset * 60 * 1000));
+    const fecha = localDate.toISOString().split('T')[0];
+    return { start: `${fecha}T00:00:00`, end: `${fecha}T23:59:59` };
 };
 </script>
 
@@ -557,21 +560,24 @@ const getTodayRange = () => {
         btn.textContent = 'Asignando...';
 
         try {
-            const payload = temporalList.map(item => ({
-                // CAMPOS PEDIDO
-                numero_remision: item.remision,
-                valor_pedido: item.valor,
-                asignado_a: parseInt(domId),
-                estado: 'pendiente'
-            }));
+            for (const item of temporalList) {
+                const payload = {
+                    // CAMPOS PEDIDO
+                    numero_remision: item.remision,
+                    valor_pedido: item.valor,
+                    asignado_a: parseInt(domId),
+                    estado: 'pendiente',
+                    timestamp_asignacion: new Date().toISOString()
+                };
 
-            const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
-                method: 'POST',
-                headers: postHeaders,
-                body: JSON.stringify(payload)
-            });
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
+                    method: 'POST',
+                    headers: postHeaders,
+                    body: JSON.stringify(payload)
+                });
 
-            if(!res.ok) throw new Error('Error al guardar en base de datos');
+                if(!res.ok) throw new Error(`Error al guardar remisión #${item.remision}`);
+            }
 
             // Prep WA
             let total = 0;
