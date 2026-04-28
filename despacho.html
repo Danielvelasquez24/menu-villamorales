@@ -281,7 +281,7 @@
 
 const SUPABASE_URL = 'https://odurfgozvbyxlormjool.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kdXJmZ296dmJ5eGxvcm1qb29sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNDI4OTYsImV4cCI6MjA5MjkxODg5Nn0.k1s68t8fBmk2ECWuRDGTXN8MXlRbdqrnb7y4f5SqDOg';
-const BASE_URL = 'https://danielvelasquez24.github.io/menu-villamorales/domiciliario.html';
+const BASE_URL = 'https://granjavillamorales.com/domiciliario.html';
 
 const getHeaders = {
     'apikey': SUPABASE_KEY,
@@ -297,6 +297,7 @@ const postHeaders = {
 let domiciliarios = [];
 let temporalList = [];
 let todayPedidos = [];
+let pagosDelDia = [];
 
 const formatCOP = (num) => {
     return Number(num).toLocaleString('es-CO', {style:'currency', currency:'COP', minimumFractionDigits:0, maximumFractionDigits:0});
@@ -476,6 +477,16 @@ const getTodayRange = () => {
             if(!res.ok) throw new Error('Error al cargar pedidos del día');
             
             todayPedidos = await res.json();
+            
+            pagosDelDia = [];
+            if(todayPedidos.length > 0) {
+                const ids = todayPedidos.map(p => p.id).join(',');
+                const pagosRes = await fetch(`${SUPABASE_URL}/rest/v1/pagos?pedido_id=in.(${ids})`, { headers: getHeaders });
+                if(pagosRes.ok) {
+                    pagosDelDia = await pagosRes.json();
+                }
+            }
+
             renderHistory();
             renderSummary();
             renderAdminList(); // update admin list for delete permissions
@@ -577,6 +588,29 @@ const getTodayRange = () => {
                 });
 
                 if(!res.ok) throw new Error(`Error al guardar remisión #${item.remision}`);
+                
+                const createdPedido = await res.json();
+                if(createdPedido && createdPedido.length > 0) {
+                    const p = createdPedido[0];
+                    const audPayload = {
+                        actor: 'despacho',
+                        actor_id: null,
+                        pedido_id: p.id,
+                        accion: 'pedido_asignado',
+                        datos_antes: null,
+                        datos_despues: {
+                            domiciliario_id: parseInt(domId),
+                            domiciliario_nombre: domNombre,
+                            numero_remision: item.remision,
+                            valor_pedido: item.valor
+                        }
+                    };
+                    fetch(`${SUPABASE_URL}/rest/v1/auditoria`, {
+                        method: 'POST',
+                        headers: postHeaders,
+                        body: JSON.stringify(audPayload)
+                    }).catch(err => console.error(err));
+                }
             }
 
             // Prep WA
@@ -652,18 +686,30 @@ const getTodayRange = () => {
                 const stateClass = p.estado.replace(/\s+/g, '_').toLowerCase();
                 const displayState = p.estado.replace(/_/g, ' ');
                 
+                const orderPagos = pagosDelDia.filter(pg => pg.pedido_id === p.id);
+                let pagosHtml = '';
+                if(orderPagos.length > 0) {
+                    const breakdown = orderPagos.map(pg => `${pg.metodo}: ${formatCOP(pg.valor)}`).join(' | ');
+                    pagosHtml = `
+                    <div class="history-details" style="background:#fce4e4; padding: 6px 10px; border-radius:6px; margin-top:8px; margin-bottom:8px; font-weight: 500; font-size:13px; color:var(--brown); justify-content:center;">
+                        ${breakdown}
+                    </div>
+                    `;
+                }
+
                 html += `
                     <div class="history-item" id="pedido-${p.id}">
                         <div class="history-item-header">
                             <span class="history-remision">#${p.numero_remision}</span>
                             <span class="badge ${stateClass}">${displayState}</span>
                         </div>
+                        ${pagosHtml}
                         <div class="history-details">
                             <span>Pedido:</span> <strong>${formatCOP(p.valor_pedido)}</strong>
                         </div>
-                        ${p.metodo_pago ? `
+                        ${p.estado !== 'pendiente' ? `
                         <div class="history-details">
-                            <span>Pago (${p.metodo_pago}):</span> <strong>${formatCOP(p.valor_pagado)}</strong>
+                            <span>Pagado:</span> <strong>${formatCOP(p.valor_pagado || 0)}</strong>
                         </div>` : ''}
                         
                         ${p.estado === 'pendiente' ? `
@@ -690,6 +736,28 @@ const getTodayRange = () => {
 
     async function executeDeletePedido(id) {
         try {
+            const pedido = todayPedidos.find(p => p.id === id);
+            if(pedido) {
+                const audPayload = {
+                    actor: 'despacho',
+                    actor_id: null,
+                    pedido_id: id,
+                    accion: 'pedido_eliminado',
+                    datos_antes: {
+                        domiciliario_id: pedido.asignado_a,
+                        numero_remision: pedido.numero_remision,
+                        valor_pedido: pedido.valor_pedido,
+                        estado: pedido.estado
+                    },
+                    datos_despues: null
+                };
+                fetch(`${SUPABASE_URL}/rest/v1/auditoria`, {
+                    method: 'POST',
+                    headers: postHeaders,
+                    body: JSON.stringify(audPayload)
+                }).catch(err => console.error(err));
+            }
+
             const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?id=eq.${id}`, { method: 'DELETE', headers: getHeaders });
             if(!res.ok) throw new Error('Error al eliminar');
             await loadHistory();
