@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Granja Villa Morales — Catálogo</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F7F3EE;
+    --warm-white: #FDFAF6;
+    --red: #C0392B;
+    --red-dark: #96251F;
+    --red-light: #E74C3C;
+    --brown: #6B3A2A;
+    --brown-light: #9B6B50;
+    --green: #2D6A4F;
+    --green-light: #52B788;
+    --text: #1A1209;
+    --text-soft: #5C4A3A;
+    --border: #E8DDD4;
+    --shadow: rgba(107, 58, 42, 0.12);
+    --badge-iva: #2D6A4F;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(160deg, #1A0A05 0%, #3D1A10 60%, #6B2E1A 100%);
+    padding: 24px 20px 20px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+  }
+  .header-inner { max-width: 480px; margin: 0 auto; display: flex; align-items: center; gap: 14px; }
+  .logo-wrap { flex-shrink: 0; width: 62px; height: 62px; border-radius: 50%; border: 2.5px solid rgba(255,255,255,0.25); overflow: hidden; background: #fff; }
+  .logo-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .header-text { text-align: left; }
+  .header-name {
+    font-family: 'Playfair Display', serif;
+    color: #fff;
+    font-size: 18px;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+  }
+  .header-sub {
+    color: rgba(255,255,255,0.55);
+    font-size: 11.5px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* ── SEARCH ── */
+  .search-bar {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    position: sticky;
+    top: 102px;
+    z-index: 99;
+  }
+  .search-inner { max-width: 480px; margin: 0 auto; position: relative; }
+  .search-input {
+    width: 100%;
+    padding: 10px 16px 10px 40px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14.5px;
+    background: var(--cream);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--brown-light); }
+  .search-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--brown-light); font-size: 16px; pointer-events: none; }
+  .search-clear { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-soft); cursor: pointer; font-size: 18px; display: none; padding: 2px 4px; }
+  .search-clear.visible { display: block; }
+
+  /* ── CATEGORY PILLS ── */
+  .cats-wrap { background: #fff; border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
+  .cats-wrap::-webkit-scrollbar { display: none; }
+  .cats-inner { display: flex; gap: 8px; padding: 10px 16px; max-width: 480px; margin: 0 auto; width: max-content; }
+  .cat-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-soft);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.18s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .cat-btn.active {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+  }
+  .cat-icon { font-size: 14px; }
+
+  /* ── CONTENT ── */
+  .content { max-width: 480px; margin: 0 auto; padding: 0 0 120px; }
+
+  /* ── SECTION ── */
+  .section { margin-top: 0; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 16px 10px;
+    background: var(--cream);
+    position: sticky;
+    top: 178px;
+    z-index: 50;
+  }
+  .section-icon { font-size: 20px; }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--brown);
+    letter-spacing: 0.01em;
+  }
+  .section-count {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--brown-light);
+    font-weight: 500;
+    background: var(--border);
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  /* ── PRODUCT CARD ── */
+  .products { padding: 0 12px; display: flex; flex-direction: column; gap: 8px; padding-bottom: 8px; }
+  .card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 13px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    transition: transform 0.12s, box-shadow 0.12s;
+    cursor: pointer;
+    user-select: none;
+  }
+  .card:active { transform: scale(0.985); box-shadow: 0 1px 6px var(--shadow); }
+  .card-left { flex: 1; min-width: 0; }
+  .card-name {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.4;
+    word-break: break-word;
+  }
+  .card-badges { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; align-items: center; }
+  .badge-iva {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--green);
+    background: #E8F5EE;
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+  }
+  .badge-consultar {
+    font-size: 10.5px;
+    font-weight: 500;
+    color: var(--brown-light);
+    background: #F0E8E0;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 7px; flex-shrink: 0; }
+  .card-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--red);
+    white-space: nowrap;
+  }
+  .add-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    font-size: 20px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.12s;
+    flex-shrink: 0;
+  }
+  .add-btn:active { background: var(--red-dark); transform: scale(0.9); }
+  .add-btn.in-cart { background: var(--green); }
+
+  /* ── EMPTY STATE ── */
+  .empty { text-align: center; padding: 60px 20px; color: var(--text-soft); }
+  .empty-icon { font-size: 44px; margin-bottom: 12px; }
+  .empty-text { font-size: 15px; }
+
+  /* ── CART FAB ── */
+  .cart-fab {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: 28px;
+    padding: 14px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 6px 24px rgba(192, 57, 43, 0.45);
+    cursor: pointer;
+    transition: background 0.15s, box-shadow 0.15s;
+    z-index: 200;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .cart-fab.visible { opacity: 1; pointer-events: auto; }
+  .cart-fab:active { background: var(--red-dark); }
+  .cart-badge {
+    background: #fff;
+    color: var(--red);
+    font-weight: 700;
+    font-size: 13px;
+    border-radius: 12px;
+    padding: 2px 8px;
+    min-width: 22px;
+    text-align: center;
+  }
+
+  /* ── CART SHEET ── */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 300;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .overlay.open { opacity: 1; pointer-events: auto; }
+  .cart-sheet {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--warm-white);
+    border-radius: 20px 20px 0 0;
+    padding: 0 0 env(safe-area-inset-bottom, 16px);
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 400;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .cart-sheet.open { transform: translateY(0); }
+  .sheet-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto 0; }
+  .sheet-header {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .sheet-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--brown);
+  }
+  .sheet-close {
+    background: none;
+    border: none;
+    font-size: 22px;
+    color: var(--text-soft);
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+  }
+  .cart-items { padding: 10px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .cart-item {
+    background: var(--cream);
+    border-radius: 10px;
+    padding: 11px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .ci-name { flex: 1; font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.35; }
+  .ci-price { font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 700; color: var(--red); white-space: nowrap; }
+  .ci-remove { background: none; border: none; color: #C0392B; font-size: 18px; cursor: pointer; padding: 2px 4px; }
+  .cart-qty {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+  }
+  .qty-btn {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: #fff;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--text);
+    line-height: 1;
+  }
+  .qty-val { font-weight: 600; min-width: 16px; text-align: center; font-size: 14px; }
+  .cart-footer {
+    padding: 14px 16px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--warm-white);
+    position: sticky;
+    bottom: 0;
+  }
+  .cart-total-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .cart-total-label { font-size: 14px; color: var(--text-soft); font-weight: 500; }
+  .cart-total-val { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--brown); }
+  .wa-btn {
+    width: 100%;
+    padding: 14px;
+    background: #25D366;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    transition: background 0.15s;
+  }
+  .wa-btn:active { background: #1aaa52; }
+  .wa-btn svg { width: 20px; height: 20px; fill: #fff; }
+  .clear-btn {
+    width: 100%;
+    margin-top: 9px;
+    padding: 11px;
+    background: transparent;
+    color: var(--text-soft);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .empty-cart { text-align: center; padding: 40px 20px; color: var(--text-soft); }
+  .empty-cart-icon { font-size: 36px; margin-bottom: 8px; }
+  .divider { height: 1px; background: var(--border); margin: 4px 0 0; }
+  .section-hidden { display: none; }
+
+  /* search highlight */
+  mark { background: #FDEEA3; color: inherit; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <div class="logo-wrap">
+      <img src="data:image/jpeg;base64,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" alt="Logo Granja Villa Morales">
+    </div>
+    <div class="header-text">
+      <div class="header-name">Granja Villa Morales</div>
+      <div class="header-sub">Cárnicos · Vegetales · Frutas</div>
+    </div>
+  </div>
+</div>
+
+<!-- SEARCH -->
+<div class="search-bar">
+  <div class="search-inner">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" type="text" id="searchInput" placeholder="Buscar producto..." autocomplete="off" autocorrect="off">
+    <button class="search-clear" id="searchClear">✕</button>
+  </div>
+</div>
+
+<!-- CATEGORIES -->
+<div class="cats-wrap" id="catsWrap">
+  <div class="cats-inner" id="catsInner"></div>
+</div>
+
+<!-- CONTENT -->
+<div class="content" id="content"></div>
+
+<!-- CART FAB -->
+<button class="cart-fab" id="cartFab">
+  🛒 Ver pedido
+  <span class="cart-badge" id="cartBadge">0</span>
+</button>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeCart()"></div>
+
+<!-- WELCOME MODAL -->
+<div class="overlay" id="welcomeOverlay"></div>
+<div id="welcomeModal" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%) scale(0.9); background:var(--warm-white); z-index:400; border-radius:20px; width:90%; max-width:400px; padding:24px 20px; opacity:0; pointer-events:none; transition:opacity 0.3s, transform 0.3s; box-shadow:0 10px 30px rgba(0,0,0,0.3);">
+  <div style="text-align:center; font-size:32px; margin-bottom:12px;">📍</div>
+  <h2 style="font-family:'Playfair Display', serif; font-size:20px; color:var(--brown); text-align:center; margin-bottom:12px;">Catálogo Punto de Venta</h2>
+  <p style="font-size:14.5px; color:var(--text); text-align:center; margin-bottom:20px; line-height:1.4;">Este catálogo es solo para recoger pedidos en punto de venta.</p>
+  <p style="font-size:14px; color:var(--text-soft); text-align:center; margin-bottom:16px; line-height:1.4;">Si deseas realizar un domicilio, por favor contacta con una de nuestras asesoras:</p>
+  
+  <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:24px;">
+    <a href="https://wa.me/573004685917" target="_blank" class="wa-btn" style="text-decoration:none;">💬 Blanca — 300 468 5917</a>
+    <a href="https://wa.me/573151313002" target="_blank" class="wa-btn" style="text-decoration:none;">💬 Lucelly — 315 131 3002</a>
+    <a href="https://wa.me/573105922910" target="_blank" class="wa-btn" style="text-decoration:none;">💬 Leidy — 310 592 2910</a>
+  </div>
+  
+  <button class="clear-btn" style="width:100%; margin-top:0; border:2px solid var(--red); color:var(--red); font-weight:600;" onclick="closeWelcomeModal()">Entendido, continuar</button>
+</div>
+
+<!-- CLIENTE MODAL -->
+<div class="overlay" id="clienteOverlay" onclick="closeClienteModal()"></div>
+<div class="cart-sheet" id="clienteSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <span class="sheet-title">Tus Datos</span>
+    <button class="sheet-close" onclick="closeClienteModal()">✕</button>
+  </div>
+  <div style="padding: 20px;">
+    <div style="margin-bottom: 12px;">
+      <label style="display:block; font-size: 13px; font-weight:600; margin-bottom:4px;">Nombre completo *</label>
+      <input type="text" id="clienteNombre" class="search-input" minlength="3" style="width:100%;" placeholder="Tu nombre...">
+    </div>
+    <div style="margin-bottom: 12px;">
+      <label style="display:block; font-size: 13px; font-weight:600; margin-bottom:4px;">Teléfono *</label>
+      <input type="tel" id="clienteTelefono" class="search-input" minlength="10" style="width:100%;" placeholder="Tu teléfono...">
+    </div>
+    <div style="margin-bottom: 20px;">
+      <label style="display:block; font-size: 13px; font-weight:600; margin-bottom:4px;">Documento (Opcional)</label>
+      <input type="text" id="clienteDoc" class="search-input" style="width:100%;" placeholder="Tu documento...">
+    </div>
+    <div style="display:flex; gap: 10px;">
+      <button class="clear-btn" style="flex:1; margin-top:0;" onclick="closeClienteModal()">Cancelar</button>
+      <button class="wa-btn" style="flex:1;" onclick="submitClienteModal()">Continuar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CART SHEET -->
+<div class="cart-sheet" id="cartSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <span class="sheet-title">Mi pedido</span>
+    <button class="sheet-close" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer">
+    <div class="cart-total-row">
+      <span class="cart-total-label">Total estimado</span>
+      <span class="cart-total-val" id="cartTotal">$0</span>
+    </div>
+    <button class="wa-btn" id="waBtn">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+      Enviar por WhatsApp
+    </button>
+    <button class="clear-btn" onclick="clearCart()">Vaciar pedido</button>
+  </div>
+</div>
+
+<script>
+const PRODUCTOS = [{"id":1,"nombre":"Alas con costillar campo x kilo al vacio","categoria":"POLLO","precio_venta":11250.0,"iva":"N"},{"id":2,"nombre":"Alas sin costillar campo x kilo al vacio","categoria":"POLLO","precio_venta":15000.0,"iva":"N"},{"id":3,"nombre":"Chuletas de pollo x 10 Unds (1200 gms aprx)","categoria":"POLLO","precio_venta":27346.275,"iva":"S"},{"id":4,"nombre":"Churrazco de pernil de pollo campo x 5 (1200 gms aprx)","categoria":"POLLO","precio_venta":42775.0,"iva":"N"},{"id":5,"nombre":"Contramuslo Campo x kilo","categoria":"POLLO","precio_venta":9090.0,"iva":"N"},{"id":6,"nombre":"Costillar Campo x kilo","categoria":"POLLO","precio_venta":7050.0,"iva":"N"},{"id":7,"nombre":"Filete 80 gms x 10 Und","categoria":"POLLO","precio_venta":19888.2,"iva":"N"},{"id":8,"nombre":"Filete 90 gms x 10 Und","categoria":"POLLO","precio_venta":22374.225,"iva":"N"},{"id":9,"nombre":"Filete 100 gms x 10 Und","categoria":"POLLO","precio_venta":24860.25,"iva":"N"},{"id":10,"nombre":"Filete 100 gms x 5 Und","categoria":"POLLO","precio_venta":13780.125,"iva":"N"},{"id":11,"nombre":"Filete 110 gms x 10 Und","categoria":"POLLO","precio_venta":27346.275,"iva":"N"},{"id":12,"nombre":"Filete 120 gms x 10 Und","categoria":"POLLO","precio_venta":29832.3,"iva":"N"},{"id":13,"nombre":"Filete 150 gms x 10 Und","categoria":"POLLO","precio_venta":37290.375,"iva":"N"},{"id":14,"nombre":"Filete 170 gms x 5 Und","categoria":"POLLO","precio_venta":22481.2125,"iva":"N"},{"id":15,"nombre":"Filete 200 gms x 5 Und","categoria":"POLLO","precio_venta":26210.25,"iva":"N"},{"id":16,"nombre":"Filete 250 gms x 5 Und","categoria":"POLLO","precio_venta":32425.3125,"iva":"N"},{"id":17,"nombre":"Filete 300 gms x 5 Und","categoria":"POLLO","precio_venta":38640.375,"iva":"N"},{"id":18,"nombre":"Filete 350 gms x 5 Und","categoria":"POLLO","precio_venta":38640.375,"iva":"N"},{"id":19,"nombre":"Filete 400 gms x 5 Und","categoria":"POLLO","precio_venta":51070.5,"iva":"N"},{"id":20,"nombre":"Filetes de pollo adobados 100 gms x 10 Unidades","categoria":"POLLO","precio_venta":27560.25,"iva":"N"},{"id":21,"nombre":"Gallina X UNIDAD grande","categoria":"POLLO","precio_venta":51300.0,"iva":"N"},{"id":22,"nombre":"Gallina X UNIDAD pequeña","categoria":"POLLO","precio_venta":27000.0,"iva":"N"},{"id":23,"nombre":"Contramuslo campo promocion x 6","categoria":"POLLO","precio_venta":15012.0,"iva":"N"},{"id":24,"nombre":"Muslo campo x kilo","categoria":"POLLO","precio_venta":9750.0,"iva":"N"},{"id":25,"nombre":"Muslos campo promocion x 6","categoria":"POLLO","precio_venta":11700.0,"iva":"N"},{"id":26,"nombre":"Pechuga Blanca x kilo","categoria":"POLLO","precio_venta":19050.0,"iva":"N"},{"id":27,"nombre":"Pechuga Campo x kilo","categoria":"POLLO","precio_venta":17700.0,"iva":"N"},{"id":28,"nombre":"Pernil Blanco x kilo","categoria":"POLLO","precio_venta":9000.0,"iva":"N"},{"id":29,"nombre":"Pernil Campo x kilo","categoria":"POLLO","precio_venta":8250.0,"iva":"N"},{"id":30,"nombre":"Pollo entero Blanco seco x kilo","categoria":"POLLO","precio_venta":13200.0,"iva":"N"},{"id":31,"nombre":"Pollo entero campo seco x kilo","categoria":"POLLO","precio_venta":14520.0,"iva":"N"},{"id":32,"nombre":"Trozo de pechuga premium x kilo","categoria":"POLLO","precio_venta":18000.0,"iva":"N"},{"id":33,"nombre":"Trozo de pechuga mixto x kilo","categoria":"POLLO","precio_venta":17250.0,"iva":"N"},{"id":34,"nombre":"Alitas precocidas apanadas x 500 gms (7 a 8 piezas aprx) al vacio","categoria":"POLLO","precio_venta":9750.0,"iva":"S"},{"id":35,"nombre":"Alitas precocidas con salsa BBQ x 500 gms (7 a 8 piezas aprx)","categoria":"POLLO","precio_venta":10125.0,"iva":"S"},{"id":36,"nombre":"Chuzo de pollo adobado x4 Und. - 720 grs aprox.","categoria":"POLLO","precio_venta":20638.2,"iva":"S"},{"id":37,"nombre":"Corazones al vacio x500 grs","categoria":"POLLO","precio_venta":5775.0,"iva":"N"},{"id":38,"nombre":"Hamburguesa de pollo adobada x 4 Und 125g - 500 gms aprox.","categoria":"POLLO","precio_venta":24150.0,"iva":"S"},{"id":39,"nombre":"Higados al vacio x 500 grs","categoria":"POLLO","precio_venta":5775.0,"iva":"N"},{"id":40,"nombre":"Mollejas al vacio x 500 grs","categoria":"POLLO","precio_venta":5850.0,"iva":"N"},{"id":41,"nombre":"Patas de pollo al vacio x 500 grs","categoria":"POLLO","precio_venta":2700.0,"iva":"N"},{"id":42,"nombre":"Pollo desmechado x 500 gms al vacio","categoria":"POLLO","precio_venta":14850.0,"iva":"S"},{"id":43,"nombre":"Tenders apanados (Trozos de pechuga) x500 gms aprox","categoria":"POLLO","precio_venta":9438.0,"iva":"S"},{"id":44,"nombre":"Bandeja de recorte con pechuga x 500 gms aprx","categoria":"POLLO","precio_venta":9800.0,"iva":"N"},{"id":45,"nombre":"Pata pescuezo x kilo","categoria":"POLLO","precio_venta":5000.0,"iva":"N"},{"id":46,"nombre":"Trozos de pollo campo surtido economico x 500 gms aprx","categoria":"POLLO","precio_venta":5100.0,"iva":"N"},{"id":47,"nombre":"Viscera fina (2 Patas, 2 higados, 1 molleja, 1 corazon) al vacio x 300 gms aprx","categoria":"POLLO","precio_venta":2760.0,"iva":"N"},{"id":48,"nombre":"Filete de Bola de Res de 100 gms x 10 unidades","categoria":"RES","precio_venta":44250.0,"iva":"N"},{"id":49,"nombre":"Filete de bola de Res de 100 gms x 5 unidades","categoria":"RES","precio_venta":23375.0,"iva":"N"},{"id":50,"nombre":"Filete de Bola de Res de 120 gms x 10 unidades","categoria":"RES","precio_venta":53100.0,"iva":"N"},{"id":51,"nombre":"Filete de Bola de Res de 150 gms x 10 unidades","categoria":"RES","precio_venta":66375.0,"iva":"N"},{"id":52,"nombre":"Filete de Bola de Res de 200 gms x 10 unidades","categoria":"RES","precio_venta":88500.0,"iva":"N"},{"id":53,"nombre":"Filete de Caderita de Res de 100 gms x 10 unidades","categoria":"RES","precio_venta":43950.0,"iva":"N"},{"id":54,"nombre":"Filete de Caderita de Res de 120 gms x 10 unidades","categoria":"RES","precio_venta":52740.0,"iva":"N"},{"id":55,"nombre":"Filete de Caderita de Res de 150 gms x 10 unidades","categoria":"RES","precio_venta":65925.0,"iva":"N"},{"id":56,"nombre":"Filete de Caderita de Res de 200 gms x 10 unidades","categoria":"RES","precio_venta":87900.0,"iva":"N"},{"id":57,"nombre":"Carne desmechada de res x 500 gms","categoria":"RES","precio_venta":35400.0,"iva":"N","disabled":true},{"id":58,"nombre":"Chorizo de res x 500 gms (5 unidades)","categoria":"RES","precio_venta":24518.4,"iva":"S","disabled":true},{"id":59,"nombre":"Hamburgesa de Res Ahumada 4 unidades x 125 gms (500 gms aprx)","categoria":"RES","precio_venta":22918.4,"iva":"S"},{"id":60,"nombre":"Filete de Bola de Res de 100 gms x 5 unidades al vacio","categoria":"RES","precio_venta":28320.0,"iva":"N"},{"id":61,"nombre":"Filete de Bola de Res de 100 gms x 3 unidades al vacio","categoria":"RES","precio_venta":18691.2,"iva":"N"},{"id":62,"nombre":"Molida Especial de Res Adobada X 500 Grs","categoria":"RES","precio_venta":15486.0,"iva":"N"},{"id":63,"nombre":"Molida Especial de Res X 500 Grs","categoria":"RES","precio_venta":14736.0,"iva":"N"},{"id":64,"nombre":"Trozos de Caderita de Res X 500 Grs","categoria":"RES","precio_venta":26370.0,"iva":"N"},{"id":65,"nombre":"Churrasco Argentino x 3 unidades de 330 gms c/u 1000 gms","categoria":"RES","precio_venta":66825.0,"iva":"S"},{"id":66,"nombre":"Lomo Caracho Corte al Barril x 1000 gms entero","categoria":"RES","precio_venta":60750.0,"iva":"S"},{"id":67,"nombre":"Lomo Caracho Corte de Mariposa 5 unidades x 200 gms","categoria":"RES","precio_venta":66825.0,"iva":"S"},{"id":68,"nombre":"Lomo Viche Filete BABY 5 unidades x 100 gms","categoria":"RES","precio_venta":33412.5,"iva":"N"},{"id":69,"nombre":"Lomo Viche Filete Mignon 3 unidades x 600 gms","categoria":"RES","precio_venta":44962.5,"iva":"N"},{"id":70,"nombre":"Punta de Anca a la Parrilla x 4 unidades 250 gms c/u","categoria":"RES","precio_venta":74250.0,"iva":"N"},{"id":71,"nombre":"Punta de Anca al Barril","categoria":"RES","precio_venta":67500.0,"iva":"N"},{"id":72,"nombre":"Filete de Lomo de Cerdo de 100 gms x 10 und","categoria":"CERDO","precio_venta":27853.0,"iva":"N"},{"id":73,"nombre":"Filete de Lomo de Cerdo de 100 gms x 5 und al vacio","categoria":"CERDO","precio_venta":15076.5,"iva":"N"},{"id":74,"nombre":"Filete de Lomo de Cerdo de 200 gms x 5 und","categoria":"CERDO","precio_venta":27853.0,"iva":"N"},{"id":75,"nombre":"Filete de pierna de Cerdo de 100 gms x 10 und","categoria":"CERDO","precio_venta":23989.0,"iva":"N"},{"id":76,"nombre":"Filete de pierna de Cerdo de 100 gms x 5 und al vacio","categoria":"CERDO","precio_venta":11994.5,"iva":"N"},{"id":77,"nombre":"Filete de pierna de Cerdo de 120 gms x 10 unid","categoria":"CERDO","precio_venta":28786.8,"iva":"N"},{"id":78,"nombre":"Filete de Pierna de Cerdo de 150 gms x 10 und","categoria":"CERDO","precio_venta":35983.5,"iva":"N"},{"id":79,"nombre":"Filete de Pierna de Cerdo de 200 gms x 10 und","categoria":"CERDO","precio_venta":47978.0,"iva":"N"},{"id":80,"nombre":"Chicharroncitos Ahumado x 500 gms al vacio","categoria":"CERDO","precio_venta":14400.0,"iva":"N"},{"id":81,"nombre":"Chorizo Colombiano X 500 Grs 5 und al vacio","categoria":"CERDO","precio_venta":15080.0,"iva":"S"},{"id":82,"nombre":"Chuleta de Cerdo x 10 und","categoria":"CERDO","precio_venta":38176.0,"iva":"S"},{"id":83,"nombre":"Chuleta de Cerdo x 5 und al vacio","categoria":"CERDO","precio_venta":20688.0,"iva":"S"},{"id":84,"nombre":"Costilla de Cerdo ahumada con salsa BBQ al vacio x 500 gms","categoria":"CERDO","precio_venta":21000.0,"iva":"S"},{"id":85,"nombre":"Desmechada de cerdo x 500 gms","categoria":"CERDO","precio_venta":4800.0,"iva":"N","disabled":true},{"id":86,"nombre":"Espinazo de cerdo x 500 gms al vacio","categoria":"CERDO","precio_venta":7200.0,"iva":"N"},{"id":87,"nombre":"Molida Especial de Cerdo Adobada X 500 Grs","categoria":"CERDO","precio_venta":20175.0,"iva":"S"},{"id":88,"nombre":"Molida Especial de Cerdo X 500 Grs","categoria":"CERDO","precio_venta":17175.0,"iva":"N"},{"id":89,"nombre":"Pezuña de Cerdo x 1 und al vacio","categoria":"CERDO","precio_venta":4800.0,"iva":"N"},{"id":90,"nombre":"Trocitos de Cerdo X 500 grs al vacio","categoria":"CERDO","precio_venta":18288.0,"iva":"N"},{"id":91,"nombre":"Trozos de Costichon (Costilla+tocineta) para airfryer X 900 Grs empacados al vacio","categoria":"CERDO","precio_venta":30400.0,"iva":"N"},{"id":92,"nombre":"Bondiola Entera de Cerdo Corte para Barril X 1,5 KLS empacada al vacio","categoria":"CERDO","precio_venta":36375.0,"iva":"S"},{"id":93,"nombre":"Costichon de Cerdo al Barril (Costilla+tocineta) X 1,5 KLS empacada al vacio","categoria":"CERDO","precio_venta":45000.0,"iva":"S"},{"id":94,"nombre":"Churrazco de cerdo de 200 gms x 5 unid al vacio","categoria":"CERDO","precio_venta":27750.0,"iva":"N","disabled":true},{"id":95,"nombre":"Pollo guisado congelado x 500 gms","categoria":"PRODUCTOS_TERMINADOS","precio_venta":null,"iva":"S"},{"id":96,"nombre":"Goulash de res x 500 gms","categoria":"PRODUCTOS_TERMINADOS","precio_venta":null,"iva":"S"},{"id":97,"nombre":"Cerdo tex-Mex x 250 gms","categoria":"PRODUCTOS_TERMINADOS","precio_venta":null,"iva":"S"},{"id":98,"nombre":"Mix de verduras para arroces x 500 gms al vacio","categoria":"FRUTAS_VERDURAS","precio_venta":5537.5,"iva":"S"},{"id":99,"nombre":"Mix de verduras para sopas x 750 gms al vacio","categoria":"FRUTAS_VERDURAS","precio_venta":8265.0,"iva":"S"},{"id":100,"nombre":"Mix de verduras cortes para WOK x 500 gms al vacio","categoria":"FRUTAS_VERDURAS","precio_venta":5712.5,"iva":"S"},{"id":101,"nombre":"Mix de verduras para saltear x 500 gms al vacio","categoria":"FRUTAS_VERDURAS","precio_venta":8380.0,"iva":"S"},{"id":102,"nombre":"Langostinos (U25) sin cascara, 14 unidades x 360 gms apx al vacio","categoria":"PESCADOS","precio_venta":16500.0,"iva":"N"},{"id":103,"nombre":"Camarones titi sin vena x 500 gms al vacio","categoria":"PESCADOS","precio_venta":12650.0,"iva":"N"}];
+
+const CATS = {
+  'TODOS': { label: 'Todos', icon: '🏪' },
+  'POLLO': { label: 'Pollo', icon: '🐔' },
+  'RES': { label: 'Res', icon: '🥩' },
+  'CERDO': { label: 'Cerdo', icon: '🐷' },
+  'FRUTAS_VERDURAS': { label: 'Verduras', icon: '🥦' },
+  'PESCADOS': { label: 'Mariscos', icon: '🦐' },
+  'PRODUCTOS_TERMINADOS': { label: 'Preparados', icon: '🍲' },
+};
+
+// WA number — edit if needed
+const WA_NUMBER = '573176746601';
+
+let cart = {}; // id → {producto, qty}
+let activecat = 'TODOS';
+let searchQ = '';
+
+// ── FORMAT ──
+function fmtCOP(n) {
+  return '$' + Math.round(n).toLocaleString('es-CO');
+}
+
+// ── RENDER CATEGORIES ──
+function renderCats() {
+  const inner = document.getElementById('catsInner');
+  inner.innerHTML = '';
+  Object.entries(CATS).forEach(([key, val]) => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn' + (key === activecat ? ' active' : '');
+    btn.innerHTML = `<span class="cat-icon">${val.icon}</span>${val.label}`;
+    btn.onclick = () => { activecat = key; searchQ = ''; document.getElementById('searchInput').value = ''; document.getElementById('searchClear').classList.remove('visible'); renderAll(); };
+    inner.appendChild(btn);
+  });
+}
+
+// ── HIGHLIGHT ──
+function highlight(text, q) {
+  if (!q) return text;
+  const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+  return text.replace(re, '<mark>$1</mark>');
+}
+
+// ── RENDER PRODUCTS ──
+function renderAll() {
+  renderCats();
+  const content = document.getElementById('content');
+  content.innerHTML = '';
+  const q = searchQ.toLowerCase().trim();
+
+  // Filter
+  let filtered = PRODUCTOS.filter(p => {
+    const matchCat = activecat === 'TODOS' || p.categoria === activecat;
+    const matchQ = !q || p.nombre.toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+
+  if (filtered.length === 0) {
+    content.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div><div class="empty-text">Sin resultados para "<strong>${searchQ}</strong>"</div></div>`;
+    return;
+  }
+
+  // Group by category (if TODOS)
+  const groups = {};
+  filtered.forEach(p => {
+    if (!groups[p.categoria]) groups[p.categoria] = [];
+    groups[p.categoria].push(p);
+  });
+
+  Object.entries(groups).forEach(([cat, prods]) => {
+    const catInfo = CATS[cat] || { label: cat, icon: '📦' };
+    const section = document.createElement('div');
+    section.className = 'section';
+
+    const header = document.createElement('div');
+    header.className = 'section-header';
+    header.innerHTML = `<span class="section-icon">${catInfo.icon}</span><span class="section-title">${catInfo.label}</span><span class="section-count">${prods.length}</span>`;
+    section.appendChild(header);
+
+    const list = document.createElement('div');
+    list.className = 'products';
+
+    prods.forEach(p => {
+      const inCart = !!cart[p.id];
+      const card = document.createElement('div');
+      card.className = 'card';
+      const nameHtml = highlight(p.nombre, q);
+      const precio = p.precio_venta != null ? fmtCOP(p.precio_venta) : null;
+      const isTerminadoAgotado = p.categoria === 'PRODUCTOS_TERMINADOS' && p.precio_venta == null;
+      const isDisabled = p.disabled === true || isTerminadoAgotado;
+      
+      let badgeCustom = '';
+      if (p.disabled === true) {
+        badgeCustom = '<span class="badge-consultar" style="background: #e0e0e0; color: #666;">No disponible</span>';
+      } else if (isTerminadoAgotado) {
+        badgeCustom = '<span class="badge-consultar" style="background: #e0e0e0; color: #666;">Agotado por ahora</span>';
+      } else if (precio == null) {
+        badgeCustom = '<span class="badge-consultar">Consultar precio</span>';
+      }
+
+      card.innerHTML = `
+        <div class="card-left">
+          <div class="card-name">${nameHtml}</div>
+          <div class="card-badges">
+            ${p.iva === 'S' ? '<span class="badge-iva">IVA incl.</span>' : ''}
+            ${badgeCustom}
+          </div>
+        </div>
+        <div class="card-right">
+          ${precio ? `<span class="card-price">${precio}</span>` : ''}
+          ${!isDisabled && precio ? `<button class="add-btn ${inCart ? 'in-cart' : ''}" data-id="${p.id}">${inCart ? '✓' : '+'}</button>` : ''}
+        </div>`;
+      if (isDisabled) {
+        card.style.opacity = '0.45';
+        card.style.pointerEvents = 'none';
+      }
+      list.appendChild(card);
+    });
+
+    section.appendChild(list);
+    content.appendChild(section);
+    if (Object.keys(groups).indexOf(cat) < Object.keys(groups).length - 1) {
+      const div = document.createElement('div');
+      div.className = 'divider';
+      content.appendChild(div);
+    }
+  });
+
+  // Bind add buttons
+  document.querySelectorAll('.add-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = parseInt(btn.dataset.id);
+      toggleCart(id);
+    });
+  });
+}
+
+// ── CART ──
+function toggleCart(id) {
+  const p = PRODUCTOS.find(x => x.id === id);
+  if (!p || p.precio_venta == null) return;
+  if (cart[id]) {
+    cart[id].qty++;
+  } else {
+    cart[id] = { producto: p, qty: 1 };
+  }
+  updateCartUI();
+  renderAll();
+}
+
+function removeFromCart(id) {
+  delete cart[id];
+  updateCartUI();
+  renderCartItems();
+  renderAll();
+}
+
+function changeQty(id, delta) {
+  if (!cart[id]) return;
+  cart[id].qty += delta;
+  if (cart[id].qty <= 0) { delete cart[id]; }
+  updateCartUI();
+  renderCartItems();
+  renderAll();
+}
+
+function clearCart() {
+  cart = {};
+  updateCartUI();
+  renderCartItems();
+  renderAll();
+  closeCart();
+}
+
+function updateCartUI() {
+  const count = Object.keys(cart).length;
+  const fab = document.getElementById('cartFab');
+  document.getElementById('cartBadge').textContent = count;
+  fab.classList.toggle('visible', count > 0);
+}
+
+function renderCartItems() {
+  const container = document.getElementById('cartItems');
+  const items = Object.values(cart);
+  if (items.length === 0) {
+    container.innerHTML = `<div class="empty-cart"><div class="empty-cart-icon">🛒</div><div>Tu pedido está vacío</div></div>`;
+    document.getElementById('cartTotal').textContent = '$0';
+    return;
+  }
+  let total = 0;
+  container.innerHTML = '';
+  items.forEach(({ producto: p, qty }) => {
+    total += p.precio_venta * qty;
+    const item = document.createElement('div');
+    item.className = 'cart-item';
+    item.innerHTML = `
+      <div class="ci-name">${p.nombre}</div>
+      <div class="cart-qty">
+        <button class="qty-btn" data-id="${p.id}" data-d="-1">−</button>
+        <span class="qty-val">${qty}</span>
+        <button class="qty-btn" data-id="${p.id}" data-d="1">+</button>
+      </div>
+      <div class="ci-price">${fmtCOP(p.precio_venta * qty)}</div>
+      <button class="ci-remove" data-id="${p.id}">✕</button>`;
+    container.appendChild(item);
+  });
+  document.getElementById('cartTotal').textContent = fmtCOP(total);
+
+  container.querySelectorAll('.qty-btn').forEach(b => b.addEventListener('click', () => changeQty(parseInt(b.dataset.id), parseInt(b.dataset.d))));
+  container.querySelectorAll('.ci-remove').forEach(b => b.addEventListener('click', () => removeFromCart(parseInt(b.dataset.id))));
+}
+
+function openCart() {
+  renderCartItems();
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('cartSheet').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCart() {
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('cartSheet').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── WHATSAPP ──
+document.getElementById('waBtn').addEventListener('click', () => {
+  const items = Object.values(cart);
+  if (!items.length) return;
+  if (!clienteData) { openClienteModal(); return; }
+  
+  let msg = '🛒 *Pedido Granja Villa Morales*\n\n';
+  msg += `👤 Cliente: ${clienteData.nombre}\n`;
+  msg += `📱 Teléfono: ${clienteData.tel}\n`;
+  if (clienteData.doc) {
+    msg += `🆔 Documento: ${clienteData.doc}\n`;
+  }
+  msg += '\n📦 Pedidos:\n';
+  
+  let total = 0;
+  items.forEach(({ producto: p, qty }) => {
+    msg += `• ${p.nombre} x${qty} — ${fmtCOP(p.precio_venta * qty)}\n`;
+    total += p.precio_venta * qty;
+  });
+  msg += `\n*Total estimado: ${fmtCOP(total)}*\n\n_Enviado desde el catálogo digital_`;
+  const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+});
+
+// ── SEARCH ──
+const searchInput = document.getElementById('searchInput');
+const searchClear = document.getElementById('searchClear');
+
+searchInput.addEventListener('input', () => {
+  searchQ = searchInput.value;
+  activecat = 'TODOS';
+  searchClear.classList.toggle('visible', searchQ.length > 0);
+  renderAll();
+});
+
+searchClear.addEventListener('click', () => {
+  searchQ = '';
+  searchInput.value = '';
+  searchClear.classList.remove('visible');
+  renderAll();
+});
+
+// ── CLIENTE LOGIC ──
+let clienteData = null;
+
+function openClienteModal() {
+  document.getElementById('clienteOverlay').classList.add('open');
+  document.getElementById('clienteSheet').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeClienteModal() {
+  document.getElementById('clienteOverlay').classList.remove('open');
+  document.getElementById('clienteSheet').classList.remove('open');
+  if (!document.getElementById('cartSheet').classList.contains('open')) {
+    document.body.style.overflow = '';
+  }
+}
+
+function submitClienteModal() {
+  const nombre = document.getElementById('clienteNombre').value.trim();
+  const tel = document.getElementById('clienteTelefono').value.trim();
+  const doc = document.getElementById('clienteDoc').value.trim();
+  if (nombre.length < 3) { alert('Ingresa un nombre válido (mínimo 3 letras).'); return; }
+  if (tel.length < 10) { alert('Ingresa un teléfono válido (mínimo 10 números).'); return; }
+  clienteData = { nombre, tel, doc };
+  closeClienteModal();
+  openCart();
+}
+
+// ── FAB ──
+document.getElementById('cartFab').addEventListener('click', () => {
+  if (!clienteData) {
+    openClienteModal();
+  } else {
+    openCart();
+  }
+});
+
+// ── INIT ──
+renderAll();
+
+function openWelcomeModal() {
+  document.getElementById('welcomeOverlay').classList.add('open');
+  const modal = document.getElementById('welcomeModal');
+  modal.style.opacity = '1';
+  modal.style.pointerEvents = 'auto';
+  modal.style.transform = 'translate(-50%, -50%) scale(1)';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeWelcomeModal() {
+  document.getElementById('welcomeOverlay').classList.remove('open');
+  const modal = document.getElementById('welcomeModal');
+  modal.style.opacity = '0';
+  modal.style.pointerEvents = 'none';
+  modal.style.transform = 'translate(-50%, -50%) scale(0.9)';
+  document.body.style.overflow = '';
+}
+
+if (!localStorage.getItem('modalPVShown')) {
+  setTimeout(openWelcomeModal, 400);
+  localStorage.setItem('modalPVShown', 'true');
+}
+</script>
+</body>
+</html>
