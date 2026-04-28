@@ -389,14 +389,8 @@
   /* search highlight */
   mark { background: #FDEEA3; color: inherit; border-radius: 2px; }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
-
-<div id="qrSection" style="display:block; text-align:center; padding:16px; background:linear-gradient(160deg, #1A0A05 0%, #3D1A10 60%); border-bottom:2px solid #6B3A2A;">
-  <div style="font-family:'DM Sans',sans-serif; font-size:11px; color:rgba(255,255,255,0.6); margin-bottom:12px; text-transform:uppercase; letter-spacing:0.08em;">Escanea con tu celular</div>
-  <div id="qrCode" style="display:inline-block; background:#fff; padding:8px; border-radius:8px;"></div>
-</div>
 
 <!-- HEADER -->
 <div class="header">
@@ -452,6 +446,34 @@
   </div>
   
   <button class="clear-btn" style="width:100%; margin-top:0; border:2px solid var(--red); color:var(--red); font-weight:600;" onclick="closeWelcomeModal()">Entendido, continuar</button>
+</div>
+
+<!-- CLIENTE MODAL -->
+<div class="overlay" id="clienteOverlay" onclick="closeClienteModal()"></div>
+<div class="cart-sheet" id="clienteSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <span class="sheet-title">Tus Datos</span>
+    <button class="sheet-close" onclick="closeClienteModal()">✕</button>
+  </div>
+  <div style="padding: 20px;">
+    <div style="margin-bottom: 12px;">
+      <label style="display:block; font-size: 13px; font-weight:600; margin-bottom:4px;">Nombre completo *</label>
+      <input type="text" id="clienteNombre" class="search-input" minlength="3" style="width:100%;" placeholder="Tu nombre...">
+    </div>
+    <div style="margin-bottom: 12px;">
+      <label style="display:block; font-size: 13px; font-weight:600; margin-bottom:4px;">Teléfono *</label>
+      <input type="tel" id="clienteTelefono" class="search-input" minlength="10" style="width:100%;" placeholder="Tu teléfono...">
+    </div>
+    <div style="margin-bottom: 20px;">
+      <label style="display:block; font-size: 13px; font-weight:600; margin-bottom:4px;">Documento (Opcional)</label>
+      <input type="text" id="clienteDoc" class="search-input" style="width:100%;" placeholder="Tu documento...">
+    </div>
+    <div style="display:flex; gap: 10px;">
+      <button class="clear-btn" style="flex:1; margin-top:0;" onclick="closeClienteModal()">Cancelar</button>
+      <button class="wa-btn" style="flex:1;" onclick="submitClienteModal()">Continuar</button>
+    </div>
+  </div>
 </div>
 
 <!-- CART SHEET -->
@@ -707,14 +729,23 @@ function closeCart() {
 document.getElementById('waBtn').addEventListener('click', () => {
   const items = Object.values(cart);
   if (!items.length) return;
+  if (!clienteData) { openClienteModal(); return; }
+  
   let msg = '🛒 *Pedido Granja Villa Morales*\n\n';
+  msg += `👤 Cliente: ${clienteData.nombre}\n`;
+  msg += `📱 Teléfono: ${clienteData.tel}\n`;
+  if (clienteData.doc) {
+    msg += `🆔 Documento: ${clienteData.doc}\n`;
+  }
+  msg += '\n📦 Pedidos:\n';
+  
   let total = 0;
   items.forEach(({ producto: p, qty }) => {
     msg += `• ${p.nombre} x${qty} — ${fmtCOP(p.precio_venta * qty)}\n`;
     total += p.precio_venta * qty;
   });
   msg += `\n*Total estimado: ${fmtCOP(total)}*\n\n_Enviado desde el catálogo digital_`;
-  const url = `https://wa.me/${573122916522}?text=${encodeURIComponent(msg)}`;
+  const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
 });
 
@@ -736,17 +767,41 @@ searchClear.addEventListener('click', () => {
   renderAll();
 });
 
-// ── FAB ──
-document.getElementById('cartFab').addEventListener('click', openCart);
+// ── CLIENTE LOGIC ──
+let clienteData = null;
 
-// ── QR ──
-const QR_URL = 'https://danielvelasquez24.github.io/menu-villamorales/menu_villamorales.html';
-new QRCode(document.getElementById('qrCode'), {
-  text: QR_URL,
-  width: 160,
-  height: 160,
-  colorDark: '#3D1A10',
-  colorLight: '#ffffff',
+function openClienteModal() {
+  document.getElementById('clienteOverlay').classList.add('open');
+  document.getElementById('clienteSheet').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeClienteModal() {
+  document.getElementById('clienteOverlay').classList.remove('open');
+  document.getElementById('clienteSheet').classList.remove('open');
+  if (!document.getElementById('cartSheet').classList.contains('open')) {
+    document.body.style.overflow = '';
+  }
+}
+
+function submitClienteModal() {
+  const nombre = document.getElementById('clienteNombre').value.trim();
+  const tel = document.getElementById('clienteTelefono').value.trim();
+  const doc = document.getElementById('clienteDoc').value.trim();
+  if (nombre.length < 3) { alert('Ingresa un nombre válido (mínimo 3 letras).'); return; }
+  if (tel.length < 10) { alert('Ingresa un teléfono válido (mínimo 10 números).'); return; }
+  clienteData = { nombre, tel, doc };
+  closeClienteModal();
+  openCart();
+}
+
+// ── FAB ──
+document.getElementById('cartFab').addEventListener('click', () => {
+  if (!clienteData) {
+    openClienteModal();
+  } else {
+    openCart();
+  }
 });
 
 // ── INIT ──

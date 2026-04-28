@@ -389,14 +389,8 @@
   /* search highlight */
   mark { background: #FDEEA3; color: inherit; border-radius: 2px; }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
-
-<div id="qrSection" style="display:block; text-align:center; padding:16px; background:linear-gradient(160deg, #1A0A05 0%, #3D1A10 60%); border-bottom:2px solid #6B3A2A;">
-  <div style="font-family:'DM Sans',sans-serif; font-size:11px; color:rgba(255,255,255,0.6); margin-bottom:12px; text-transform:uppercase; letter-spacing:0.08em;">Escanea con tu celular</div>
-  <div id="qrCode" style="display:inline-block; background:#fff; padding:8px; border-radius:8px;"></div>
-</div>
 
 <!-- HEADER -->
 <div class="header">
@@ -739,7 +733,7 @@ document.getElementById('waBtn').addEventListener('click', () => {
     total += p.precio_venta * qty;
   });
   msg += `\n💰 Total: ${fmtCOP(total)}`;
-  const url = `https://wa.me/${573216955923}?text=${encodeURIComponent(msg)}`;
+  const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
 });
 
@@ -796,16 +790,6 @@ document.getElementById('cartFab').addEventListener('click', () => {
   } else {
     openCart();
   }
-});
-
-// ── QR ──
-const QR_URL = 'https://danielvelasquez24.github.io/menu-villamorales/menu_empleados.html';
-new QRCode(document.getElementById('qrCode'), {
-  text: QR_URL,
-  width: 160,
-  height: 160,
-  colorDark: '#3D1A10',
-  colorLight: '#ffffff',
 });
 
 // ── INIT ──
