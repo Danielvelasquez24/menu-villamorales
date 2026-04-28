@@ -317,7 +317,10 @@ const params = new URLSearchParams(window.location.search);
 const domiciliario_id = params.get('id');
 
 let pedidos = [];
+let pagosDelDia = [];
 let currentPedido = null;
+let currentPagos = [];
+let isEditMode = false;
 
 const formatCOP = (num) => Number(num).toLocaleString('es-CO', {style:'currency', currency:'COP', minimumFractionDigits:0, maximumFractionDigits:0});
 
@@ -373,36 +376,36 @@ const getTodayRange = () => {
 
         <div id="modal_error" class="inline-error"></div>
 
-        <div class="radio-group">
-            <label class="radio-option">
-                <input type="radio" name="pago_status" id="radio-completo" onchange="handleRadioChange()" checked>
-                🟢 Pagado completo
+        <div class="radio-group" style="margin-bottom:12px;">
+            <label class="radio-option" style="padding:10px;">
+                <input type="radio" name="pago_status" id="radio-entregado" onchange="handleEstadoPrincipal()" checked>
+                📦 Entregado / Debe
             </label>
-            <label class="radio-option">
-                <input type="radio" name="pago_status" id="radio-parcial" onchange="handleRadioChange()">
-                🟡 Pago parcial
-            </label>
-            <label class="radio-option">
-                <input type="radio" name="pago_status" id="radio-nopago" onchange="handleRadioChange()">
-                🔴 No pagó
-            </label>
-            <label class="radio-option">
-                <input type="radio" name="pago_status" id="radio-devuelto" onchange="handleRadioChange()">
+            <label class="radio-option" style="padding:10px;">
+                <input type="radio" name="pago_status" id="radio-devuelto" onchange="handleEstadoPrincipal()">
                 🔵 Devuelto
             </label>
         </div>
 
-        <div class="form-group" id="block-valor" style="display: none;">
-            <label>¿Cuánto pagó? $</label>
-            <input type="number" id="input-valor" placeholder="Ej. 15000" min="1" step="1" oninput="updateDebt()">
-            <span class="debt-text" id="debt-text"></span>
-        </div>
+        <div id="block-entregado">
+            <div id="payment-lines">
+                <!-- Líneas dinámicas -->
+            </div>
+            <button class="btn-outline btn-small" style="width:100%; margin-bottom:16px; border:2px dashed var(--light-gray); padding:12px; font-weight:700; color:var(--brown); background:none; border-radius:8px; cursor:pointer;" onclick="addPaymentLine()">+ Agregar método de pago</button>
+            
+            <div style="background:#fafafa; padding:12px; border-radius:8px; margin-bottom:16px; text-align:center;">
+                <div id="progress-text" style="font-weight:700; color:var(--brown); font-size:15px; margin-bottom:6px;">Asignado: $0 de $0</div>
+                <div id="exceed-warning" style="color:var(--red); font-size:12px; display:none;">Excede el valor del pedido</div>
+            </div>
 
-        <div class="form-group" id="block-metodo">
-            <label>Método de pago</label>
-            <select id="select-metodo">
-                <!-- Opciones se llenan en JS -->
-            </select>
+            <div class="form-group">
+                <label>Estado Final</label>
+                <select id="select-estado-final">
+                    <option value="entregado_completo">Entregado completo</option>
+                    <option value="entregado_parcial">Entregado parcial</option>
+                    <option value="debe">Debe</option>
+                </select>
+            </div>
         </div>
 
         <div class="form-group" id="block-devolucion" style="display: none;">
@@ -457,6 +460,16 @@ const getTodayRange = () => {
             if(!res.ok) throw new Error('Error al cargar pedidos');
             
             pedidos = await res.json();
+            
+            pagosDelDia = [];
+            if(pedidos.length > 0) {
+                const ids = pedidos.map(p => p.id).join(',');
+                const pagosRes = await fetch(`${SUPABASE_URL}/rest/v1/pagos?pedido_id=in.(${ids})`, { headers: getHeaders });
+                if(pagosRes.ok) {
+                    pagosDelDia = await pagosRes.json();
+                }
+            }
+
             renderPedidos();
             updateSummary();
         } catch(e) {
@@ -480,7 +493,10 @@ const getTodayRange = () => {
 
             let html = `
                 <div class="card ${!isPending ? 'processed' : ''}" id="card-${p.id}">
-                    <div class="badge ${badgeClass}">${displayState}</div>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div class="badge ${badgeClass}">${displayState}</div>
+                        ${!isPending ? `<button class="btn-icon" style="font-size:14px; padding:4px 8px; border:1px solid #ddd; border-radius:6px; background:#fff;" onclick="openModal(${p.id}, true)">✏️ Editar</button>` : ''}
+                    </div>
                     <h3 class="remision-title">#${p.numero_remision}</h3>
                     <h4 class="valor-title">${formatCOP(p.valor_pedido)}</h4>
             `;
@@ -488,9 +504,16 @@ const getTodayRange = () => {
             if(isPending) {
                 html += `<button class="btn-primary" onclick="openModal(${p.id})">Registrar entrega</button>`;
             } else {
+                const orderPagos = pagosDelDia.filter(pg => pg.pedido_id === p.id);
+                let pagosHtml = '';
+                if(orderPagos.length > 0) {
+                    const breakdown = orderPagos.map(pg => `${pg.metodo}: ${formatCOP(pg.valor)}`).join(' | ');
+                    pagosHtml = `<p style="margin-top:6px; margin-bottom:10px; font-weight:500; color:var(--brown); font-size:13px; text-align:center; background:#fce4e4; padding:8px; border-radius:6px;">${breakdown}</p>`;
+                }
+
                 html += `
                     <div class="processed-details">
-                        <p><span>Método:</span> <strong>${p.metodo_pago}</strong></p>
+                        ${pagosHtml}
                         <p><span>Recaudado:</span> <strong>${formatCOP(p.valor_pagado)}</strong></p>
                         <p><span>Hora:</span> <strong>${formatTime(p.timestamp_entrega)}</strong></p>
                     </div>
@@ -503,17 +526,33 @@ const getTodayRange = () => {
     }
 
     // Modal Logic
-    function openModal(id) {
+    function openModal(id, editMode = false) {
         currentPedido = pedidos.find(p => p.id === id);
         if(!currentPedido) return;
+        isEditMode = editMode;
 
         document.getElementById('modal-header-title').textContent = `Remisión #${currentPedido.numero_remision} — ${formatCOP(currentPedido.valor_pedido)}`;
-        
-        document.getElementById('radio-completo').checked = true;
         document.getElementById('modal_error').style.display = 'none';
         
-        handleRadioChange();
-        
+        currentPagos = [];
+        if(editMode && currentPedido.estado !== 'devuelto') {
+            const op = pagosDelDia.filter(pg => pg.pedido_id === id);
+            if(op.length > 0) {
+                currentPagos = op.map(pg => ({ metodo: pg.metodo, valor: pg.valor }));
+            } else {
+                currentPagos.push({ metodo: 'Efectivo', valor: currentPedido.valor_pedido });
+            }
+            document.getElementById('radio-entregado').checked = true;
+        } else if (editMode && currentPedido.estado === 'devuelto') {
+            document.getElementById('radio-devuelto').checked = true;
+        } else {
+            // New register
+            currentPagos.push({ metodo: 'Efectivo', valor: currentPedido.valor_pedido });
+            document.getElementById('radio-entregado').checked = true;
+        }
+
+        handleEstadoPrincipal();
+        document.getElementById('btn-confirm').textContent = isEditMode ? 'Guardar Cambios' : 'Confirmar';
         document.getElementById('register-modal').classList.add('active');
     }
 
@@ -522,101 +561,112 @@ const getTodayRange = () => {
         currentPedido = null;
     }
 
-    function handleRadioChange() {
-        const isCompleto = document.getElementById('radio-completo').checked;
-        const isParcial = document.getElementById('radio-parcial').checked;
-        const isNoPago = document.getElementById('radio-nopago').checked;
+    function handleEstadoPrincipal() {
         const isDevuelto = document.getElementById('radio-devuelto').checked;
-
-        const blockValor = document.getElementById('block-valor');
-        const blockMetodo = document.getElementById('block-metodo');
-        const blockDevolucion = document.getElementById('block-devolucion');
-        const selectMetodo = document.getElementById('select-metodo');
-        const inputValor = document.getElementById('input-valor');
-        const debtText = document.getElementById('debt-text');
-
-        if(isCompleto) {
-            blockValor.style.display = 'none';
-            blockMetodo.style.display = 'block';
-            blockDevolucion.style.display = 'none';
-            selectMetodo.innerHTML = '<option value="Efectivo">Efectivo</option><option value="Nequi">Nequi</option><option value="Transferencia">Transferencia</option><option value="Debe">Debe</option>';
-            selectMetodo.disabled = false;
-            selectMetodo.value = 'Efectivo';
-        } else if(isParcial) {
-            blockValor.style.display = 'block';
-            blockMetodo.style.display = 'block';
-            blockDevolucion.style.display = 'none';
-            inputValor.value = '';
-            debtText.textContent = `Deuda: ${formatCOP(currentPedido.valor_pedido)}`;
-            selectMetodo.innerHTML = '<option value="Efectivo">Efectivo</option><option value="Nequi">Nequi</option><option value="Transferencia">Transferencia</option><option value="Debe">Debe</option>';
-            selectMetodo.disabled = false;
-            selectMetodo.value = 'Efectivo';
-            setTimeout(() => inputValor.focus(), 100);
-        } else if(isNoPago) {
-            blockValor.style.display = 'none';
-            blockMetodo.style.display = 'block';
-            blockDevolucion.style.display = 'none';
-            selectMetodo.innerHTML = '<option value="Debe">Debe</option>';
-            selectMetodo.disabled = true;
-        } else if(isDevuelto) {
-            blockValor.style.display = 'none';
-            blockMetodo.style.display = 'none';
-            blockDevolucion.style.display = 'block';
+        if(isDevuelto) {
+            document.getElementById('block-entregado').style.display = 'none';
+            document.getElementById('block-devolucion').style.display = 'block';
+        } else {
+            document.getElementById('block-entregado').style.display = 'block';
+            document.getElementById('block-devolucion').style.display = 'none';
+            renderPaymentLines();
         }
     }
 
-    function updateDebt() {
-        const val = parseFloat(document.getElementById('input-valor').value) || 0;
-        const debt = currentPedido.valor_pedido - val;
-        document.getElementById('debt-text').textContent = `Deuda: ${formatCOP(debt)}`;
+    function addPaymentLine() {
+        const currentSum = currentPagos.reduce((acc, p) => acc + (parseFloat(p.valor) || 0), 0);
+        const remaining = Math.max(0, currentPedido.valor_pedido - currentSum);
+        currentPagos.push({ metodo: 'Efectivo', valor: remaining });
+        renderPaymentLines();
+    }
+
+    function removePaymentLine(index) {
+        currentPagos.splice(index, 1);
+        if(currentPagos.length === 0) {
+            currentPagos.push({ metodo: 'Efectivo', valor: currentPedido.valor_pedido });
+        }
+        renderPaymentLines();
+    }
+
+    function updatePaymentVal(index, val) {
+        currentPagos[index].valor = parseFloat(val) || 0;
+        calculateTotals();
+    }
+
+    function updatePaymentMet(index, val) {
+        currentPagos[index].metodo = val;
+    }
+
+    function renderPaymentLines() {
+        const container = document.getElementById('payment-lines');
+        container.innerHTML = '';
+        currentPagos.forEach((p, idx) => {
+            container.innerHTML += `
+                <div style="display:flex; gap:8px; margin-bottom:12px; align-items:center;">
+                    <select style="flex:1; padding:12px; font-size:14px;" onchange="updatePaymentMet(${idx}, this.value)">
+                        <option value="Efectivo" ${p.metodo === 'Efectivo'?'selected':''}>Efectivo</option>
+                        <option value="Nequi" ${p.metodo === 'Nequi'?'selected':''}>Nequi</option>
+                        <option value="Transferencia" ${p.metodo === 'Transferencia'?'selected':''}>Transferencia</option>
+                        <option value="Debe" ${p.metodo === 'Debe'?'selected':''}>Debe</option>
+                    </select>
+                    <input type="number" style="flex:1; padding:12px; font-size:14px;" value="${p.valor}" oninput="updatePaymentVal(${idx}, this.value)" min="0" step="1">
+                    <button class="btn-icon" style="color:var(--red); padding:0 8px; font-weight:bold; background:#fce4e4; border-radius:4px;" onclick="removePaymentLine(${idx})">✕</button>
+                </div>
+            `;
+        });
+        calculateTotals();
+    }
+
+    function calculateTotals() {
+        const sum = currentPagos.reduce((acc, p) => acc + (parseFloat(p.valor) || 0), 0);
+        const progText = document.getElementById('progress-text');
+        const excWarn = document.getElementById('exceed-warning');
+        const selEstado = document.getElementById('select-estado-final');
+
+        progText.textContent = `Asignado: ${formatCOP(sum)} de ${formatCOP(currentPedido.valor_pedido)}`;
+        
+        if (sum > currentPedido.valor_pedido) {
+            excWarn.style.display = 'block';
+        } else {
+            excWarn.style.display = 'none';
+        }
+
+        if (sum >= currentPedido.valor_pedido) {
+            selEstado.value = 'entregado_completo';
+        } else if (sum > 0) {
+            selEstado.value = 'entregado_parcial';
+        } else {
+            selEstado.value = 'debe';
+        }
     }
 
     async function confirmDelivery() {
-        const isCompleto = document.getElementById('radio-completo').checked;
-        const isParcial = document.getElementById('radio-parcial').checked;
-        const isNoPago = document.getElementById('radio-nopago').checked;
         const isDevuelto = document.getElementById('radio-devuelto').checked;
         const errDiv = document.getElementById('modal_error');
         errDiv.style.display = 'none';
 
-        let newState, newMetodo, newValorPagado;
+        let newState, newValorPagado = 0;
+        let finalPagosToInsert = [];
 
-        if(isCompleto) {
-            newState = 'entregado_completo';
-            newMetodo = document.getElementById('select-metodo').value;
-            newValorPagado = currentPedido.valor_pedido;
-        } else if(isParcial) {
-            const val = parseFloat(document.getElementById('input-valor').value);
-            if(isNaN(val) || val < 0) {
-                errDiv.textContent = 'Ingresa un valor válido';
-                errDiv.style.display = 'block';
-                return;
-            }
-            if(val === 0) {
-                errDiv.textContent = 'El valor es $0, selecciona "No pagó"';
-                errDiv.style.display = 'block';
-                return;
-            }
-            if(val > currentPedido.valor_pedido) {
-                errDiv.textContent = 'El valor pagado no puede superar el total del pedido';
-                errDiv.style.display = 'block';
-                return;
-            }
-            newState = 'entregado_parcial';
-            newMetodo = document.getElementById('select-metodo').value;
-            newValorPagado = val;
-            
-            if(val == currentPedido.valor_pedido) {
-                newState = 'entregado_completo';
-            }
-        } else if(isNoPago) {
-            newState = 'debe';
-            newMetodo = 'Debe';
-            newValorPagado = 0;
-        } else if(isDevuelto) {
+        if (isDevuelto) {
             newState = 'devuelto';
-            newMetodo = 'devuelto';
             newValorPagado = 0;
+        } else {
+            const sum = currentPagos.reduce((acc, p) => acc + (parseFloat(p.valor) || 0), 0);
+            if(sum > currentPedido.valor_pedido) {
+                errDiv.textContent = 'El valor asignado excede el pedido.';
+                errDiv.style.display = 'block';
+                return;
+            }
+            newState = document.getElementById('select-estado-final').value;
+            newValorPagado = sum;
+            finalPagosToInsert = currentPagos.filter(p => p.valor > 0 || p.metodo === 'Debe');
+            
+            if(finalPagosToInsert.length === 0 && !isDevuelto) {
+                errDiv.textContent = 'Agrega un método de pago válido o selecciona Debe.';
+                errDiv.style.display = 'block';
+                return;
+            }
         }
 
         const btn = document.getElementById('btn-confirm');
@@ -626,39 +676,92 @@ const getTodayRange = () => {
         const now = new Date().toISOString();
 
         try {
+            // GET HISTORY FIRST
+            const pedRes = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?id=eq.${currentPedido.id}&select=historial,estado,valor_pagado`, { headers: getHeaders });
+            if(!pedRes.ok) throw new Error('Error al obtener pedido');
+            const pedData = await pedRes.json();
+            const actualPedido = pedData[0];
+
+            let histArray = actualPedido.historial || [];
+            if(typeof histArray === 'string') {
+                try { histArray = JSON.parse(histArray); } catch(e) { histArray = []; }
+            }
+
+            const actionType = isEditMode ? 'pago_editado' : 'pago_registrado';
+
+            histArray.push({
+                timestamp: now,
+                accion: actionType,
+                actor: 'domiciliario',
+                actor_id: parseInt(domiciliario_id),
+                datos: {
+                    pagos: isDevuelto ? [] : finalPagosToInsert,
+                    estado: newState,
+                    valor_pagado: newValorPagado
+                }
+            });
+
+            // If Edit Mode, DELETE old payments first
+            if(isEditMode) {
+                const delRes = await fetch(`${SUPABASE_URL}/rest/v1/pagos?pedido_id=eq.${currentPedido.id}`, { method: 'DELETE', headers: getHeaders });
+                if(!delRes.ok) throw new Error('Error al borrar pagos anteriores');
+            }
+
+            // INSERT NEW PAYMENTS
+            if(!isDevuelto && finalPagosToInsert.length > 0) {
+                const pagosPayload = finalPagosToInsert.map(p => ({
+                    pedido_id: currentPedido.id,
+                    metodo: p.metodo,
+                    valor: parseFloat(p.valor),
+                    timestamp: now
+                }));
+                const pagRes = await fetch(`${SUPABASE_URL}/rest/v1/pagos`, { method: 'POST', headers: postHeaders, body: JSON.stringify(pagosPayload) });
+                if(!pagRes.ok) throw new Error('Error al insertar pagos');
+            }
+
+            // UPDATE PEDIDO
             const payload = {
                 estado: newState,
-                metodo_pago: newMetodo,
                 valor_pagado: newValorPagado,
-                timestamp_entrega: now
+                timestamp_entrega: now,
+                historial: histArray
             };
 
-            const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?id=eq.${currentPedido.id}`, {
+            const upRes = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?id=eq.${currentPedido.id}`, {
                 method: 'PATCH',
                 headers: postHeaders,
                 body: JSON.stringify(payload)
             });
 
-            if(!res.ok) throw new Error('Error de red al registrar entrega');
+            if(!upRes.ok) throw new Error('Error de red al actualizar pedido');
 
-            const updatedData = await res.json();
-            
-            // Actualizar arreglo local
-            const index = pedidos.findIndex(p => p.id === currentPedido.id);
-            if(index !== -1 && updatedData.length > 0) {
-                pedidos[index] = updatedData[0];
-            }
+            // AUDITORIA (Fire and forget)
+            const audPayload = {
+                actor: 'domiciliario',
+                actor_id: parseInt(domiciliario_id),
+                pedido_id: currentPedido.id,
+                accion: actionType,
+                datos_antes: {
+                    estado: actualPedido.estado,
+                    valor_pagado: actualPedido.valor_pagado,
+                    pagos: pagosDelDia.filter(pg => pg.pedido_id === currentPedido.id)
+                },
+                datos_despues: {
+                    estado: newState,
+                    valor_pagado: newValorPagado,
+                    pagos: isDevuelto ? [] : finalPagosToInsert
+                }
+            };
+            fetch(`${SUPABASE_URL}/rest/v1/auditoria`, { method: 'POST', headers: postHeaders, body: JSON.stringify(audPayload) }).catch(console.error);
 
             closeModal();
-            renderPedidos();
-            updateSummary();
+            await loadPedidos(); // Re-fetch to get accurate pagamentos
 
         } catch(e) {
             errDiv.textContent = e.message;
             errDiv.style.display = 'block';
-        } finally {
             btn.disabled = false;
-            btn.textContent = 'Confirmar';
+            btn.textContent = isEditMode ? 'Guardar Cambios' : 'Confirmar entrega';
         }
     }
 
