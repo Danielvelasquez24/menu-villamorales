@@ -454,7 +454,7 @@
       <input type="tel" id="empTelefono" class="search-input" minlength="10" style="width:100%;" placeholder="Tu teléfono...">
     </div>
     <div style="margin-bottom: 20px;">
-      <label style="display:block; font-size: 13px; font-weight:600; margin-bottom:4px;">Documento (Opcional)</label>
+      <label style="display:block; font-size: 13px; font-weight:600; margin-bottom:4px;">Documento *</label>
       <input type="text" id="empDoc" class="search-input" style="width:100%;" placeholder="Tu documento...">
     </div>
     <div style="display:flex; gap: 10px;">
@@ -733,7 +733,7 @@ document.getElementById('waBtn').addEventListener('click', () => {
     total += p.precio_venta * qty;
   });
   msg += `\n💰 Total: ${fmtCOP(total)}`;
-  const url = `https://wa.me/${573216955923}?text=${encodeURIComponent(msg)}`;
+  const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
 });
 
@@ -778,6 +778,7 @@ function submitEmpModal() {
   const doc = document.getElementById('empDoc').value.trim();
   if (nombre.length < 3) { alert('Ingresa un nombre válido (mínimo 3 letras).'); return; }
   if (tel.length < 10) { alert('Ingresa un teléfono válido (mínimo 10 números).'); return; }
+  if (doc.length < 3) { alert('Ingresa un número de documento válido.'); return; }
   empleadoData = { nombre, tel, doc };
   closeEmpModal();
   openCart();

@@ -440,9 +440,9 @@
   <p style="font-size:14px; color:var(--text-soft); text-align:center; margin-bottom:16px; line-height:1.4;">Si deseas realizar un domicilio, por favor contacta con una de nuestras asesoras:</p>
   
   <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:24px;">
-    <a href="tel:3004685917" class="wa-btn" style="background:#2D6A4F; text-decoration:none;">📱 Blanca — 300 468 5917</a>
-    <a href="tel:3151313002" class="wa-btn" style="background:#2D6A4F; text-decoration:none;">📱 Lucelly — 315 131 3002</a>
-    <a href="tel:3105922910" class="wa-btn" style="background:#2D6A4F; text-decoration:none;">📱 Leidy — 310 592 2910</a>
+    <a href="https://wa.me/573004685917" target="_blank" class="wa-btn" style="text-decoration:none;">💬 Blanca — 300 468 5917</a>
+    <a href="https://wa.me/573151313002" target="_blank" class="wa-btn" style="text-decoration:none;">💬 Lucelly — 315 131 3002</a>
+    <a href="https://wa.me/573105922910" target="_blank" class="wa-btn" style="text-decoration:none;">💬 Leidy — 310 592 2910</a>
   </div>
   
   <button class="clear-btn" style="width:100%; margin-top:0; border:2px solid var(--red); color:var(--red); font-weight:600;" onclick="closeWelcomeModal()">Entendido, continuar</button>
@@ -745,7 +745,7 @@ document.getElementById('waBtn').addEventListener('click', () => {
     total += p.precio_venta * qty;
   });
   msg += `\n*Total estimado: ${fmtCOP(total)}*\n\n_Enviado desde el catálogo digital_`;
-  const url = `https://wa.me/${573122916522}?text=${encodeURIComponent(msg)}`;
+  const url = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
 });
 
