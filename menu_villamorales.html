@@ -389,8 +389,14 @@
   /* search highlight */
   mark { background: #FDEEA3; color: inherit; border-radius: 2px; }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
+
+<div id="qrSection" style="display:block; text-align:center; padding:16px; background:linear-gradient(160deg, #1A0A05 0%, #3D1A10 60%); border-bottom:2px solid #6B3A2A;">
+  <div style="font-family:'DM Sans',sans-serif; font-size:11px; color:rgba(255,255,255,0.6); margin-bottom:12px; text-transform:uppercase; letter-spacing:0.08em;">Escanea con tu celular</div>
+  <div id="qrCode" style="display:inline-block; background:#fff; padding:8px; border-radius:8px;"></div>
+</div>
 
 <!-- HEADER -->
 <div class="header">
@@ -431,6 +437,23 @@
 <!-- OVERLAY -->
 <div class="overlay" id="overlay" onclick="closeCart()"></div>
 
+<!-- WELCOME MODAL -->
+<div class="overlay" id="welcomeOverlay"></div>
+<div id="welcomeModal" style="position:fixed; top:50%; left:50%; transform:translate(-50%, -50%) scale(0.9); background:var(--warm-white); z-index:400; border-radius:20px; width:90%; max-width:400px; padding:24px 20px; opacity:0; pointer-events:none; transition:opacity 0.3s, transform 0.3s; box-shadow:0 10px 30px rgba(0,0,0,0.3);">
+  <div style="text-align:center; font-size:32px; margin-bottom:12px;">📍</div>
+  <h2 style="font-family:'Playfair Display', serif; font-size:20px; color:var(--brown); text-align:center; margin-bottom:12px;">Catálogo Punto de Venta</h2>
+  <p style="font-size:14.5px; color:var(--text); text-align:center; margin-bottom:20px; line-height:1.4;">Este catálogo es solo para recoger pedidos en punto de venta.</p>
+  <p style="font-size:14px; color:var(--text-soft); text-align:center; margin-bottom:16px; line-height:1.4;">Si deseas realizar un domicilio, por favor contacta con una de nuestras asesoras:</p>
+  
+  <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:24px;">
+    <a href="tel:3004685917" class="wa-btn" style="background:#2D6A4F; text-decoration:none;">📱 Blanca — 300 468 5917</a>
+    <a href="tel:3151313002" class="wa-btn" style="background:#2D6A4F; text-decoration:none;">📱 Lucelly — 315 131 3002</a>
+    <a href="tel:3105922910" class="wa-btn" style="background:#2D6A4F; text-decoration:none;">📱 Leidy — 310 592 2910</a>
+  </div>
+  
+  <button class="clear-btn" style="width:100%; margin-top:0; border:2px solid var(--red); color:var(--red); font-weight:600;" onclick="closeWelcomeModal()">Entendido, continuar</button>
+</div>
+
 <!-- CART SHEET -->
 <div class="cart-sheet" id="cartSheet">
   <div class="sheet-handle"></div>
@@ -466,7 +489,7 @@ const CATS = {
 };
 
 // WA number — edit if needed
-const WA_NUMBER = '573122916522';
+const WA_NUMBER = '573176746601';
 
 let cart = {}; // id → {producto, qty}
 let activecat = 'TODOS';
@@ -716,8 +739,41 @@ searchClear.addEventListener('click', () => {
 // ── FAB ──
 document.getElementById('cartFab').addEventListener('click', openCart);
 
+// ── QR ──
+const QR_URL = 'https://danielvelasquez24.github.io/menu-villamorales/menu_villamorales.html';
+new QRCode(document.getElementById('qrCode'), {
+  text: QR_URL,
+  width: 160,
+  height: 160,
+  colorDark: '#3D1A10',
+  colorLight: '#ffffff',
+});
+
 // ── INIT ──
 renderAll();
+
+function openWelcomeModal() {
+  document.getElementById('welcomeOverlay').classList.add('open');
+  const modal = document.getElementById('welcomeModal');
+  modal.style.opacity = '1';
+  modal.style.pointerEvents = 'auto';
+  modal.style.transform = 'translate(-50%, -50%) scale(1)';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeWelcomeModal() {
+  document.getElementById('welcomeOverlay').classList.remove('open');
+  const modal = document.getElementById('welcomeModal');
+  modal.style.opacity = '0';
+  modal.style.pointerEvents = 'none';
+  modal.style.transform = 'translate(-50%, -50%) scale(0.9)';
+  document.body.style.overflow = '';
+}
+
+if (!localStorage.getItem('modalPVShown')) {
+  setTimeout(openWelcomeModal, 400);
+  localStorage.setItem('modalPVShown', 'true');
+}
 </script>
 </body>
 </html>
