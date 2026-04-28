@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Despacho — Granja Villa Morales</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #F7F3EE;
+            --red: #C0392B;
+            --brown: #6B3A2A;
+            --green: #2D6A4F;
+            --yellow: #F39C12;
+            --gray: #95a5a6;
+            --light-gray: #e0e0e0;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --header-h: 60px;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            position: relative;
+            padding-bottom: 40px;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            background-color: var(--bg-color);
+            z-index: 10;
+            text-align: center;
+            height: var(--header-h);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid rgba(107, 58, 42, 0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        header h1 {
+            color: var(--brown);
+            font-size: 20px;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .content {
+            padding: 16px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 24px;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            font-size: 18px;
+            color: var(--brown);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .inline-inputs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            align-items: flex-end;
+        }
+
+        .input-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 13px;
+            color: var(--brown);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            box-sizing: border-box;
+            background-color: #fafafa;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--brown);
+            background-color: #fff;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--red);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button.btn-secondary { background-color: var(--green); }
+        button.btn-outline { background-color: transparent; color: var(--brown); border: 1px solid var(--brown); }
+        button.btn-small { padding: 8px 12px; font-size: 13px; width: auto; }
+        
+        button.btn-icon {
+            background: none;
+            border: none;
+            color: var(--gray);
+            font-size: 18px;
+            padding: 4px;
+            width: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        button.btn-icon:hover { color: var(--red); }
+        button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        .inline-msg {
+            font-size: 13px;
+            margin-bottom: 12px;
+            display: none;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        .inline-msg.error { color: var(--red); background-color: #fce4e4; }
+        .inline-msg.success { color: var(--green); background-color: #e8f5e9; }
+
+        /* Temporal List */
+        .temp-list { margin-top: 16px; border-top: 1px solid #eee; padding-top: 16px; }
+        .temp-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 14px;
+        }
+        .temp-item:last-child { border-bottom: none; }
+        .temp-summary {
+            background-color: rgba(107, 58, 42, 0.05); padding: 10px; border-radius: 8px;
+            margin-top: 10px; font-weight: 700; font-size: 14px; color: var(--brown); text-align: center;
+        }
+
+        .assign-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid #eee; }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5); z-index: 100;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        
+        .modal {
+            background-color: #fff; width: 90%; max-width: 400px; border-radius: 16px;
+            padding: 24px; transform: translateY(20px) scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-height: 90vh; overflow-y: auto; box-sizing: border-box;
+        }
+        .modal-overlay.active .modal { transform: translateY(0) scale(1); }
+        
+        .modal-header { font-size: 18px; color: var(--green); font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .modal-divider { height: 1px; background-color: #eee; margin: 16px 0; }
+        
+        .whatsapp-preview {
+            background-color: #f0f2f5; border-radius: 8px; padding: 12px;
+            font-family: monospace; font-size: 13px; white-space: pre-wrap;
+            border: 1px solid #ddd; margin-bottom: 8px; resize: none; height: 180px; color: #333;
+        }
+        .copy-hint { font-size: 12px; color: var(--gray); text-align: center; margin-top: 6px; margin-bottom: 16px; }
+
+        /* History & Summary */
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; color: white; text-transform: uppercase; }
+        .badge.pendiente { background-color: var(--gray); }
+        .badge.entregado_completo { background-color: var(--green); }
+        .badge.entregado_parcial { background-color: var(--yellow); }
+
+        .group-header { font-weight: 700; color: var(--brown); border-bottom: 2px solid var(--brown); padding-bottom: 4px; margin: 20px 0 10px 0; font-size: 15px; }
+        .history-item { border: 1px solid #f0f0f0; border-radius: 8px; padding: 12px; margin-bottom: 10px; background-color: #fafafa; }
+        .history-item-header { display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; }
+        .history-remision { font-weight: 700; font-size: 15px; }
+        .history-details { font-size: 13px; color: #555; display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .history-actions { margin-top: 10px; display: flex; justify-content: flex-end; }
+        
+        .summary-card { background-color: var(--brown); color: white; }
+        .summary-card h2 { color: white; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 12px; }
+        .summary-dom-item { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px dashed rgba(255,255,255,0.2); }
+        .summary-dom-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        .summary-dom-item h3 { margin: 0 0 10px 0; font-size: 16px; color: #f7f3ee; display: flex; justify-content: space-between; align-items: center;}
+        
+        .summary-stat { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px; color: rgba(255,255,255,0.9); }
+        .summary-stat span:last-child { font-weight: 700; color: white; }
+        .summary-stat.debt span:last-child { color: #ff8a80; } /* Light red for dark bg */
+
+        /* Collapsible */
+        .collapsible-header {
+            cursor: pointer; padding: 12px; background-color: rgba(107, 58, 42, 0.05);
+            border-radius: 8px; font-weight: 700; color: var(--brown); display: flex; justify-content: space-between; align-items: center;
+        }
+        .collapsible-content { display: none; padding-top: 16px; }
+        .collapsible-content.active { display: block; }
+        .admin-list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+
+        .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: skeletonLoading 1.5s infinite; border-radius: 4px; height: 20px; margin-bottom: 10px; }
+        @keyframes skeletonLoading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .empty-state { text-align: center; color: var(--gray); font-size: 14px; padding: 20px; }
+
+        /* Inline confirm wrapper */
+        .inline-confirm { display: none; background-color: #fce4e4; padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 13px; text-align: center; }
+        .inline-confirm p { margin: 0 0 8px 0; color: var(--red); font-weight: 500; }
+        .inline-confirm-btns { display: flex; gap: 10px; justify-content: center; }
+    </style>
+</head>
+<body>
+
+<script>
+/*
+ ═══════════════════════════════════════════
+ GUÍA DE CONFIGURACIÓN Y ESCALABILIDAD
+ ═══════════════════════════════════════════
+
+ CAMBIAR DOMINIO DEL LINK DE DOMICILIARIOS:
+ → Busca: const BASE_URL = '...'
+ → Cambia por el dominio real de GitHub Pages
+
+ AGREGAR UN DOMICILIARIO:
+ Opción A (recomendada): Usa la sección "Administrar domiciliarios" al final de esta página
+ Opción B: Ve a Supabase → Table Editor → domiciliarios → Insert row → nombre
+
+ AGREGAR CAMPOS A LOS PEDIDOS:
+ → Agrega la columna en Supabase: Table Editor → pedidos → Add column
+ → En este archivo busca: "// CAMPOS PEDIDO" y agrega el campo en el objeto del INSERT
+
+ CAMBIAR NÚMERO DE WHATSAPP (si se decide automatizar API):
+ → No aplica actualmente, es copiado manual.
+
+ CREDENCIALES SUPABASE:
+ → Busca: SUPABASE_URL y SUPABASE_KEY al inicio del script
+ → En producción mover a un backend con variables de entorno
+*/
+
+const SUPABASE_URL = 'https://odurfgozvbyxlormjool.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kdXJmZ296dmJ5eGxvcm1qb29sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNDI4OTYsImV4cCI6MjA5MjkxODg5Nn0.k1s68t8fBmk2ECWuRDGTXN8MXlRbdqrnb7y4f5SqDOg';
+const BASE_URL = 'https://granjavillamorales.com/domiciliario.html';
+
+const getHeaders = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_KEY,
+    'Content-Type': 'application/json'
+};
+
+const postHeaders = {
+    ...getHeaders,
+    'Prefer': 'return=representation'
+};
+
+let domiciliarios = [];
+let temporalList = [];
+let todayPedidos = [];
+
+const formatCOP = (num) => {
+    return Number(num).toLocaleString('es-CO', {style:'currency', currency:'COP', minimumFractionDigits:0, maximumFractionDigits:0});
+};
+
+async function copyToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+        try {
+            await navigator.clipboard.writeText(text);
+            return true;
+        } catch (err) {}
+    }
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.left = "-999999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+        document.execCommand('copy');
+        textArea.remove();
+        return true;
+    } catch (err) {
+        textArea.remove();
+        return false;
+    }
+}
+
+// Helper para Fechas Locales
+const getTodayRange = () => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    return { start: start.toISOString(), end: end.toISOString() };
+};
+</script>
+
+<div class="app-container">
+    <header>
+        <h1>Despacho — Granja Villa Morales</h1>
+    </header>
+
+    <div class="content">
+        
+        <!-- Bloque Asignar Pedidos -->
+        <div class="card">
+            <h2>Asignar Bloque de Pedidos</h2>
+            
+            <div id="temp_error" class="inline-msg error"></div>
+            
+            <div class="inline-inputs">
+                <div class="input-group">
+                    <label for="temp_remision">Remisión</label>
+                    <input type="text" id="temp_remision" placeholder="Ej. REM-123" onkeypress="if(event.key === 'Enter') document.getElementById('temp_valor').focus()">
+                </div>
+                <div class="input-group">
+                    <label for="temp_valor">Valor (COP)</label>
+                    <input type="number" id="temp_valor" placeholder="Ej. 50000" min="1" step="1" onkeypress="if(event.key === 'Enter') addTemporal()">
+                </div>
+            </div>
+            <button class="btn-secondary" onclick="addTemporal()">Agregar a lista</button>
+
+            <div class="temp-list" id="temp-list-container" style="display: none;">
+                <div id="temp-items"></div>
+                <div class="temp-summary" id="temp-summary">0 pedidos · Total: $0</div>
+                
+                <div class="assign-section">
+                    <div id="assign_error" class="inline-msg error"></div>
+                    <label for="domiciliario-select">Asignar a:</label>
+                    <select id="domiciliario-select" style="margin-bottom: 12px;">
+                        <option value="">Cargando...</option>
+                    </select>
+                    <button id="btn-assign" onclick="assignBlock()">Asignar bloque</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historial del Día -->
+        <div class="card">
+            <h2>
+                Historial del Día
+                <button class="btn-icon" onclick="loadHistory()" title="Refrescar">🔄</button>
+            </h2>
+            <div id="history-content">
+                <div class="skeleton"></div>
+                <div class="skeleton"></div>
+            </div>
+        </div>
+
+        <!-- Resumen -->
+        <div class="card summary-card">
+            <h2>Resumen por Domiciliario</h2>
+            <div id="summary-content">
+                <div class="skeleton"></div>
+            </div>
+        </div>
+
+        <!-- Administrar Domiciliarios -->
+        <div class="card" style="padding: 0;">
+            <div class="collapsible-header" onclick="toggleAdmin()">
+                <span>⚙️ Administrar domiciliarios</span>
+                <span id="admin-icon">▼</span>
+            </div>
+            <div class="collapsible-content" id="admin-content" style="padding: 20px;">
+                <div id="admin_msg" class="inline-msg"></div>
+                <div class="inline-inputs">
+                    <div class="input-group" style="flex: 2;">
+                        <input type="text" id="new_dom_name" placeholder="Nombre del domiciliario">
+                    </div>
+                    <button class="btn-secondary" style="flex: 1;" onclick="addDomiciliario()" id="btn-add-dom">Agregar</button>
+                </div>
+                <div id="admin-list" style="margin-top: 16px;">
+                    <div class="skeleton"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal WhatsApp -->
+<div class="modal-overlay" id="wa-modal">
+    <div class="modal">
+        <div class="modal-header">
+            ✓ Pedidos asignados a <span id="wa-dom-name" style="margin-left:5px;"></span>
+        </div>
+        <textarea id="wa-textarea" class="whatsapp-preview" readonly></textarea>
+        <div class="copy-hint">Copia este mensaje y pégalo en WhatsApp al domiciliario</div>
+        <button id="btn-copy-wa" onclick="copyWA()">📋 Copiar mensaje</button>
+        <button class="btn-outline" style="margin-top: 10px;" onclick="closeModal('wa-modal')">Cerrar</button>
+    </div>
+</div>
+
+<script>
+    // Iniciar
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadDomiciliarios();
+        await loadHistory();
+    });
+
+    function showInlineMsg(id, isError, msg) {
+        const el = document.getElementById(id);
+        el.textContent = msg;
+        el.className = `inline-msg ${isError ? 'error' : 'success'}`;
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 4000);
+    }
+
+    // CARGA DE DATOS
+    async function loadDomiciliarios() {
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/domiciliarios?select=*&order=nombre.asc`, { headers: getHeaders });
+            if(!res.ok) throw new Error('Error al cargar domiciliarios');
+            domiciliarios = await res.json();
+            
+            const select = document.getElementById('domiciliario-select');
+            select.innerHTML = '<option value="">Seleccione domiciliario...</option>';
+            domiciliarios.forEach(d => {
+                select.innerHTML += `<option value="${d.id}">${d.nombre}</option>`;
+            });
+            renderAdminList();
+        } catch(e) {
+            document.getElementById('domiciliario-select').innerHTML = '<option value="">Error de carga</option>';
+        }
+    }
+
+    async function loadHistory() {
+        const container = document.getElementById('history-content');
+        container.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div>';
+        
+        try {
+            const { start, end } = getTodayRange();
+            const url = `${SUPABASE_URL}/rest/v1/pedidos?select=*&timestamp_asignacion=gte.${start}&timestamp_asignacion=lte.${end}&order=timestamp_asignacion.desc`;
+            const res = await fetch(url, { headers: getHeaders });
+            if(!res.ok) throw new Error('Error al cargar pedidos del día');
+            
+            todayPedidos = await res.json();
+            renderHistory();
+            renderSummary();
+            renderAdminList(); // update admin list for delete permissions
+        } catch(e) {
+            container.innerHTML = `<div class="empty-state" style="color:var(--red)">${e.message}</div>`;
+        }
+    }
+
+    // TEMPORAL LIST LOGIC
+    function addTemporal() {
+        const remInput = document.getElementById('temp_remision');
+        const valInput = document.getElementById('temp_valor');
+        
+        const rem = remInput.value.trim();
+        const val = parseFloat(valInput.value);
+
+        if(!rem || isNaN(val)) {
+            showInlineMsg('temp_error', true, 'Completa remisión y valor');
+            return;
+        }
+        if(val <= 0) {
+            showInlineMsg('temp_error', true, 'El valor debe ser mayor a 0');
+            return;
+        }
+        if(temporalList.find(p => p.remision.toLowerCase() === rem.toLowerCase())) {
+            showInlineMsg('temp_error', true, 'Remisión ya agregada');
+            return;
+        }
+
+        temporalList.push({ remision: rem, valor: val });
+        remInput.value = '';
+        valInput.value = '';
+        remInput.focus();
+        renderTemporalList();
+    }
+
+    function removeTemporal(index) {
+        temporalList.splice(index, 1);
+        renderTemporalList();
+    }
+
+    function renderTemporalList() {
+        const container = document.getElementById('temp-list-container');
+        const itemsDiv = document.getElementById('temp-items');
+        const summaryDiv = document.getElementById('temp-summary');
+
+        if(temporalList.length === 0) {
+            container.style.display = 'none';
+            return;
+        }
+
+        container.style.display = 'block';
+        itemsDiv.innerHTML = '';
+        let total = 0;
+
+        temporalList.forEach((item, idx) => {
+            total += item.valor;
+            itemsDiv.innerHTML += `
+                <div class="temp-item">
+                    <span><strong>#${item.remision}</strong> — ${formatCOP(item.valor)}</span>
+                    <button class="btn-icon" onclick="removeTemporal(${idx})">✕</button>
+                </div>
+            `;
+        });
+
+        summaryDiv.textContent = `${temporalList.length} pedidos · Total: ${formatCOP(total)}`;
+    }
+
+    // ASSIGN LOGIC
+    async function assignBlock() {
+        const select = document.getElementById('domiciliario-select');
+        const domId = select.value;
+        
+        if(!domId) {
+            showInlineMsg('assign_error', true, 'Selecciona un domiciliario');
+            return;
+        }
+
+        const domNombre = select.options[select.selectedIndex].text;
+        const btn = document.getElementById('btn-assign');
+        btn.disabled = true;
+        btn.textContent = 'Asignando...';
+
+        try {
+            const payload = temporalList.map(item => ({
+                // CAMPOS PEDIDO
+                numero_remision: item.remision,
+                valor_pedido: item.valor,
+                asignado_a: parseInt(domId),
+                estado: 'pendiente'
+            }));
+
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
+                method: 'POST',
+                headers: postHeaders,
+                body: JSON.stringify(payload)
+            });
+
+            if(!res.ok) throw new Error('Error al guardar en base de datos');
+
+            // Prep WA
+            let total = 0;
+            let msgList = '';
+            temporalList.forEach(p => {
+                total += p.valor;
+                msgList += `- Remisión ${p.remision} → ${formatCOP(p.valor)}\n`;
+            });
+
+            const waMsg = `Hola ${domNombre}, aquí está tu ruta de hoy 🛵\n\n📦 Pedidos asignados:\n${msgList}\n💰 Total esperado: ${formatCOP(total)}\n\n👉 Tu link: ${BASE_URL}?id=${domId}`;
+
+            document.getElementById('wa-dom-name').textContent = domNombre;
+            document.getElementById('wa-textarea').value = waMsg;
+
+            temporalList = [];
+            renderTemporalList();
+            select.value = '';
+            
+            openModal('wa-modal');
+            await loadHistory();
+
+        } catch(e) {
+            showInlineMsg('assign_error', true, e.message);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Asignar bloque';
+        }
+    }
+
+    // MODAL & WA
+    function openModal(id) {
+        document.getElementById(id).classList.add('active');
+        document.getElementById('btn-copy-wa').textContent = '📋 Copiar mensaje';
+    }
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+    async function copyWA() {
+        const text = document.getElementById('wa-textarea').value;
+        const btn = document.getElementById('btn-copy-wa');
+        const success = await copyToClipboard(text);
+        if(success) {
+            btn.textContent = '✓ Copiado';
+        } else {
+            btn.textContent = '❌ Error al copiar';
+        }
+    }
+
+    // HISTORY RENDER
+    function renderHistory() {
+        const container = document.getElementById('history-content');
+        if(todayPedidos.length === 0) {
+            container.innerHTML = '<div class="empty-state">No hay pedidos asignados hoy.</div>';
+            return;
+        }
+
+        const grouped = {};
+        todayPedidos.forEach(p => {
+            if(!grouped[p.asignado_a]) {
+                const dom = domiciliarios.find(d => d.id === p.asignado_a);
+                grouped[p.asignado_a] = { nombre: dom ? dom.nombre : 'Desconocido', pedidos: [] };
+            }
+            grouped[p.asignado_a].pedidos.push(p);
+        });
+
+        container.innerHTML = '';
+        for(const domId in grouped) {
+            const group = grouped[domId];
+            let html = `<div class="group-header">${group.nombre} (${group.pedidos.length})</div>`;
+            
+            group.pedidos.forEach(p => {
+                const stateClass = p.estado.replace(/\s+/g, '_').toLowerCase();
+                const displayState = p.estado.replace(/_/g, ' ');
+                
+                html += `
+                    <div class="history-item" id="pedido-${p.id}">
+                        <div class="history-item-header">
+                            <span class="history-remision">#${p.numero_remision}</span>
+                            <span class="badge ${stateClass}">${displayState}</span>
+                        </div>
+                        <div class="history-details">
+                            <span>Pedido:</span> <strong>${formatCOP(p.valor_pedido)}</strong>
+                        </div>
+                        ${p.metodo_pago ? `
+                        <div class="history-details">
+                            <span>Pago (${p.metodo_pago}):</span> <strong>${formatCOP(p.valor_pagado)}</strong>
+                        </div>` : ''}
+                        
+                        ${p.estado === 'pendiente' ? `
+                        <div class="history-actions">
+                            <button class="btn-small btn-outline" style="color:var(--red); border-color:var(--red)" onclick="showConfirmDelete(${p.id})">✕ Eliminar</button>
+                        </div>
+                        <div class="inline-confirm" id="confirm-${p.id}">
+                            <p>¿Eliminar pedido?</p>
+                            <div class="inline-confirm-btns">
+                                <button class="btn-small btn-secondary" onclick="executeDeletePedido(${p.id})">Sí</button>
+                                <button class="btn-small btn-outline" onclick="hideConfirmDelete(${p.id})">No</button>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            container.innerHTML += html;
+        }
+    }
+
+    function showConfirmDelete(id) { document.getElementById(`confirm-${id}`).style.display = 'block'; }
+    function hideConfirmDelete(id) { document.getElementById(`confirm-${id}`).style.display = 'none'; }
+
+    async function executeDeletePedido(id) {
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?id=eq.${id}`, { method: 'DELETE', headers: getHeaders });
+            if(!res.ok) throw new Error('Error al eliminar');
+            await loadHistory();
+        } catch(e) {
+            alert('Error: ' + e.message); // Fallback error
+            hideConfirmDelete(id);
+        }
+    }
+
+    // SUMMARY RENDER
+    function renderSummary() {
+        const container = document.getElementById('summary-content');
+        
+        const grouped = {};
+        domiciliarios.forEach(d => {
+            grouped[d.id] = { nombre: d.nombre, id: d.id, assigned: 0, expected: 0, collected: 0 };
+        });
+
+        let hasData = false;
+        todayPedidos.forEach(p => {
+            if(grouped[p.asignado_a]) {
+                grouped[p.asignado_a].assigned++;
+                grouped[p.asignado_a].expected += parseFloat(p.valor_pedido) || 0;
+                grouped[p.asignado_a].collected += parseFloat(p.valor_pagado) || 0;
+                hasData = true;
+            }
+        });
+
+        if(!hasData) {
+            container.innerHTML = '<div class="empty-state" style="color:rgba(255,255,255,0.7)">Sin actividad hoy.</div>';
+            return;
+        }
+
+        container.innerHTML = '';
+        for(const domId in grouped) {
+            const g = grouped[domId];
+            if(g.assigned > 0) {
+                const debt = g.expected - g.collected;
+                container.innerHTML += `
+                    <div class="summary-dom-item">
+                        <h3>
+                            ${g.nombre}
+                            <button class="btn-small btn-outline" style="color:white; border-color:white;" onclick="copyLink(${g.id}, this)">📋 Link</button>
+                        </h3>
+                        <div class="summary-stat"><span>Pedidos:</span> <span>${g.assigned}</span></div>
+                        <div class="summary-stat"><span>Esperado:</span> <span>${formatCOP(g.expected)}</span></div>
+                        <div class="summary-stat"><span>Recaudado:</span> <span>${formatCOP(g.collected)}</span></div>
+                        <div class="summary-stat total ${debt > 0 ? 'debt' : ''}">
+                            <span>Deuda:</span> <span>${formatCOP(debt)}</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+    }
+
+    async function copyLink(id, btn) {
+        const link = `${BASE_URL}?id=${id}`;
+        const success = await copyToClipboard(link);
+        if(success) {
+            const original = btn.textContent;
+            btn.textContent = '✓ Copiado';
+            setTimeout(() => btn.textContent = original, 2000);
+        }
+    }
+
+    // ADMIN SECTION
+    function toggleAdmin() {
+        const content = document.getElementById('admin-content');
+        const icon = document.getElementById('admin-icon');
+        if(content.classList.contains('active')) {
+            content.classList.remove('active');
+            icon.textContent = '▼';
+        } else {
+            content.classList.add('active');
+            icon.textContent = '▲';
+        }
+    }
+
+    function renderAdminList() {
+        const container = document.getElementById('admin-list');
+        container.innerHTML = '';
+        
+        domiciliarios.forEach(d => {
+            // Check if has orders today
+            const hasOrders = todayPedidos.some(p => p.asignado_a === d.id);
+            
+            container.innerHTML += `
+                <div class="admin-list-item">
+                    <span>${d.nombre} <small style="color:var(--gray)">ID:${d.id}</small></span>
+                    ${!hasOrders ? `
+                        <button class="btn-icon" onclick="showConfirmDeleteDom(${d.id})" style="font-size:14px; color:var(--red);">✕</button>
+                    ` : '<span style="font-size:12px; color:var(--gray)">Activo hoy</span>'}
+                </div>
+                <div class="inline-confirm" id="confirm-dom-${d.id}">
+                    <p>¿Eliminar domiciliario?</p>
+                    <div class="inline-confirm-btns">
+                        <button class="btn-small btn-secondary" onclick="deleteDomiciliario(${d.id})">Sí</button>
+                        <button class="btn-small btn-outline" onclick="hideConfirmDeleteDom(${d.id})">No</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    function showConfirmDeleteDom(id) { document.getElementById(`confirm-dom-${id}`).style.display = 'block'; }
+    function hideConfirmDeleteDom(id) { document.getElementById(`confirm-dom-${id}`).style.display = 'none'; }
+
+    async function addDomiciliario() {
+        const input = document.getElementById('new_dom_name');
+        const name = input.value.trim();
+        if(!name) return;
+
+        const btn = document.getElementById('btn-add-dom');
+        btn.disabled = true;
+
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/domiciliarios`, {
+                method: 'POST',
+                headers: postHeaders,
+                body: JSON.stringify({ nombre: name })
+            });
+            if(!res.ok) throw new Error('Error al agregar');
+            
+            showInlineMsg('admin_msg', false, 'Domiciliario agregado');
+            input.value = '';
+            await loadDomiciliarios();
+        } catch(e) {
+            showInlineMsg('admin_msg', true, e.message);
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    async function deleteDomiciliario(id) {
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/domiciliarios?id=eq.${id}`, { method: 'DELETE', headers: getHeaders });
+            if(!res.ok) throw new Error('Error al eliminar');
+            
+            showInlineMsg('admin_msg', false, 'Domiciliario eliminado');
+            await loadDomiciliarios();
+        } catch(e) {
+            showInlineMsg('admin_msg', true, e.message);
+            hideConfirmDeleteDom(id);
+        }
+    }
+</script>
+
+</body>
+</html>

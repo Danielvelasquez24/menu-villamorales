@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Entregas — Granja Villa Morales</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #F7F3EE;
+            --red: #C0392B;
+            --brown: #6B3A2A;
+            --green: #2D6A4F;
+            --yellow: #F39C12;
+            --gray: #95a5a6;
+            --light-gray: #e0e0e0;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --header-h: 60px;
+            --footer-h: 60px;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            padding-bottom: calc(var(--footer-h) + 20px);
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            background-color: var(--bg-color);
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            height: var(--header-h);
+            border-bottom: 1px solid rgba(107, 58, 42, 0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        header h1 {
+            color: var(--brown);
+            font-size: 18px;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--brown);
+            width: auto;
+            padding: 4px;
+            cursor: pointer;
+        }
+
+        .content {
+            padding: 16px;
+        }
+
+        /* Cards */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 16px;
+            position: relative;
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+
+        .card.processed {
+            opacity: 0.7;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            color: white;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .badge.pendiente { background-color: var(--gray); }
+        .badge.entregado_completo { background-color: var(--green); }
+        .badge.entregado_parcial { background-color: var(--yellow); color: #333; }
+
+        .remision-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--brown);
+            margin: 0 0 6px 0;
+        }
+
+        .valor-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--red);
+            margin: 0 0 16px 0;
+        }
+
+        .processed-details {
+            font-size: 14px;
+            color: #555;
+            background: #fafafa;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 1px solid #eee;
+        }
+        .processed-details p {
+            margin: 6px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        .processed-details p:last-child { margin-bottom: 0; }
+        .processed-details p:first-child { margin-top: 0; }
+        .processed-details strong {
+            color: var(--text-main);
+        }
+
+        /* Buttons */
+        button.btn-primary {
+            width: 100%;
+            padding: 16px;
+            background-color: var(--red);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+        button.btn-primary:active { transform: scale(0.98); }
+        button.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        /* Modal Layout */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            display: flex;
+            align-items: flex-end;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        
+        .modal {
+            background-color: #fff;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            border-radius: 24px 24px 0 0;
+            padding: 24px 24px 30px 24px;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-height: 90vh;
+            overflow-y: auto;
+            box-sizing: border-box;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+        }
+        .modal-overlay.active .modal { transform: translateY(0); }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 16px;
+        }
+        .modal-header h3 { margin: 0; color: var(--brown); font-size: 18px; }
+        .btn-close-modal { background: none; border: none; color: #aaa; font-size: 28px; padding: 0; line-height: 1; cursor: pointer; }
+
+        /* Form elements */
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border: 2px solid var(--light-gray);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            font-size: 16px;
+            background-color: #fafafa;
+        }
+        .radio-option:has(input:checked) {
+            border-color: var(--brown);
+            background-color: rgba(107, 58, 42, 0.05);
+        }
+        .radio-option input[type="radio"] {
+            margin-right: 16px;
+            transform: scale(1.5);
+            accent-color: var(--brown);
+        }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px; color: var(--brown); }
+        input, select {
+            width: 100%; padding: 14px; border: 1px solid var(--light-gray); border-radius: 8px;
+            font-family: 'DM Sans', sans-serif; font-size: 16px; box-sizing: border-box; background-color: #fafafa;
+        }
+        input:focus, select:focus { outline: none; border-color: var(--brown); background-color: #fff; }
+        select:disabled { background-color: #eef; color: #555; opacity: 1; border-color: #ddd; }
+
+        .debt-text { color: var(--red); font-size: 14px; font-weight: 700; margin-top: 8px; display: block; }
+        .inline-error { color: var(--red); font-size: 14px; background-color: #fce4e4; padding: 12px; border-radius: 8px; margin-bottom: 20px; display: none; }
+
+        /* Sticky Footer */
+        .sticky-footer {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background-color: white;
+            height: var(--footer-h);
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+        }
+        .footer-content {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 20px;
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--brown);
+        }
+
+        /* Screen States */
+        .full-screen-msg {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 70vh; text-align: center; padding: 20px; color: var(--brown); font-size: 16px;
+        }
+        .spinner {
+            width: 40px; height: 40px; border: 4px solid rgba(107, 58, 42, 0.1);
+            border-top-color: var(--brown); border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 20px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<script>
+/*
+ ═══════════════════════════════════════════
+ GUÍA DOMICILIARIO.HTML
+ ═══════════════════════════════════════════
+
+ CÓMO FUNCIONA EL ACCESO:
+ → El domiciliario accede via link único: domiciliario.html?id=[ID]
+ → El ID viene de la tabla domiciliarios en Supabase
+ → Despacho genera y envía el link desde despacho.html
+
+ AGREGAR MÉTODOS DE PAGO:
+ → Busca en el código: "Efectivo | Nequi | Transferencia | Debe"
+ → Agrega la nueva opción en todos los dropdowns de método de pago
+
+ AGREGAR ESTADOS DE ENTREGA:
+ → Busca: "// ESTADOS" y agrega el nuevo estado
+ → Actualiza los badges de color correspondientes
+
+ CAMBIAR CAMPOS DEL RESUMEN:
+ → Busca: "// RESUMEN" y modifica los campos que se suman
+*/
+
+const SUPABASE_URL = 'https://odurfgozvbyxlormjool.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kdXJmZ296dmJ5eGxvcm1qb29sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzczNDI4OTYsImV4cCI6MjA5MjkxODg5Nn0.k1s68t8fBmk2ECWuRDGTXN8MXlRbdqrnb7y4f5SqDOg';
+
+const getHeaders = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_KEY,
+    'Content-Type': 'application/json'
+};
+
+const postHeaders = {
+    ...getHeaders,
+    'Prefer': 'return=representation'
+};
+
+const params = new URLSearchParams(window.location.search);
+const domiciliario_id = params.get('id');
+
+let pedidos = [];
+let currentPedido = null;
+
+const formatCOP = (num) => Number(num).toLocaleString('es-CO', {style:'currency', currency:'COP', minimumFractionDigits:0, maximumFractionDigits:0});
+
+const formatTime = (isoString) => {
+    if(!isoString) return '';
+    const d = new Date(isoString);
+    let h = d.getHours();
+    let m = d.getMinutes().toString().padStart(2, '0');
+    let ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12;
+    h = h ? h : 12;
+    return `${h}:${m} ${ampm}`;
+};
+
+const getTodayRange = () => {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0).toISOString();
+    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999).toISOString();
+    return { start, end };
+};
+</script>
+
+<div class="app-container" id="main-app" style="display: none;">
+    <header>
+        <h1 id="header-name">Hola 👋</h1>
+        <button class="btn-icon" onclick="loadPedidos()">🔄</button>
+    </header>
+
+    <div class="content" id="pedidos-list">
+        <!-- Lista de pedidos -->
+    </div>
+
+    <div class="sticky-footer">
+        <div class="footer-content" id="summary-text">
+            ✓ 0 entregados · 💰 $0 · ⏳ 0 pendientes
+        </div>
+    </div>
+</div>
+
+<div id="error-screen" class="full-screen-msg" style="display: none;">
+    <h2>⚠️ Link inválido</h2>
+    <p>Solicita tu link a despacho para ver tus pedidos asignados.</p>
+</div>
+
+<!-- Modal Registrar Entrega -->
+<div class="modal-overlay" id="register-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="modal-header-title">Remisión</h3>
+            <button class="btn-close-modal" onclick="closeModal()">✕</button>
+        </div>
+
+        <div id="modal_error" class="inline-error"></div>
+
+        <div class="radio-group">
+            <label class="radio-option">
+                <input type="radio" name="pago_status" id="radio-completo" onchange="handleRadioChange()" checked>
+                🟢 Pagado completo
+            </label>
+            <label class="radio-option">
+                <input type="radio" name="pago_status" id="radio-parcial" onchange="handleRadioChange()">
+                🟡 Pago parcial
+            </label>
+            <label class="radio-option">
+                <input type="radio" name="pago_status" id="radio-nopago" onchange="handleRadioChange()">
+                🔴 No pagó
+            </label>
+        </div>
+
+        <div class="form-group" id="block-valor" style="display: none;">
+            <label>¿Cuánto pagó? $</label>
+            <input type="number" id="input-valor" placeholder="Ej. 15000" min="1" step="1" oninput="updateDebt()">
+            <span class="debt-text" id="debt-text"></span>
+        </div>
+
+        <div class="form-group" id="block-metodo">
+            <label>Método de pago</label>
+            <select id="select-metodo">
+                <!-- Opciones se llenan en JS -->
+            </select>
+        </div>
+
+        <button class="btn-primary" id="btn-confirm" onclick="confirmDelivery()" style="margin-top: 10px;">Confirmar</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        if(!domiciliario_id) {
+            document.getElementById('error-screen').style.display = 'flex';
+            return;
+        }
+        await identifyUser();
+    });
+
+    async function identifyUser() {
+        try {
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/domiciliarios?id=eq.${domiciliario_id}&select=nombre`, { headers: getHeaders });
+            if(!res.ok) throw new Error('Error al conectar');
+            const data = await res.json();
+            
+            if(data.length === 0) {
+                document.getElementById('error-screen').innerHTML = '<h2>⚠️ Domiciliario no encontrado</h2><p>Verifica tu link.</p>';
+                document.getElementById('error-screen').style.display = 'flex';
+                return;
+            }
+
+            document.getElementById('header-name').textContent = `Hola, ${data[0].nombre.split(' ')[0]} 👋`;
+            document.getElementById('main-app').style.display = 'block';
+
+            await loadPedidos();
+        } catch(e) {
+            document.getElementById('error-screen').innerHTML = '<h2>⚠️ Error de conexión</h2><p>Intenta recargar la página.</p>';
+            document.getElementById('error-screen').style.display = 'flex';
+        }
+    }
+
+    async function loadPedidos() {
+        const container = document.getElementById('pedidos-list');
+        container.innerHTML = '<div class="full-screen-msg"><div class="spinner"></div>Cargando pedidos...</div>';
+        
+        try {
+            const { start, end } = getTodayRange();
+            const url = `${SUPABASE_URL}/rest/v1/pedidos?asignado_a=eq.${domiciliario_id}&timestamp_asignacion=gte.${start}&timestamp_asignacion=lte.${end}&order=id.asc`;
+            
+            const res = await fetch(url, { headers: getHeaders });
+            if(!res.ok) throw new Error('Error al cargar pedidos');
+            
+            pedidos = await res.json();
+            renderPedidos();
+            updateSummary();
+        } catch(e) {
+            container.innerHTML = `<div class="full-screen-msg" style="color:var(--red)">${e.message}</div>`;
+        }
+    }
+
+    function renderPedidos() {
+        const container = document.getElementById('pedidos-list');
+        if(pedidos.length === 0) {
+            container.innerHTML = '<div class="full-screen-msg" style="height:60vh;">No tienes pedidos asignados hoy.</div>';
+            return;
+        }
+
+        container.innerHTML = '';
+        pedidos.forEach(p => {
+            const isPending = p.estado === 'pendiente';
+            // ESTADOS
+            const badgeClass = p.estado.replace(/\s+/g, '_').toLowerCase();
+            const displayState = p.estado.replace(/_/g, ' ');
+
+            let html = `
+                <div class="card ${!isPending ? 'processed' : ''}" id="card-${p.id}">
+                    <div class="badge ${badgeClass}">${displayState}</div>
+                    <h3 class="remision-title">#${p.numero_remision}</h3>
+                    <h4 class="valor-title">${formatCOP(p.valor_pedido)}</h4>
+            `;
+
+            if(isPending) {
+                html += `<button class="btn-primary" onclick="openModal(${p.id})">Registrar entrega</button>`;
+            } else {
+                html += `
+                    <div class="processed-details">
+                        <p><span>Método:</span> <strong>${p.metodo_pago}</strong></p>
+                        <p><span>Recaudado:</span> <strong>${formatCOP(p.valor_pagado)}</strong></p>
+                        <p><span>Hora:</span> <strong>${formatTime(p.timestamp_entrega)}</strong></p>
+                    </div>
+                `;
+            }
+
+            html += `</div>`;
+            container.innerHTML += html;
+        });
+    }
+
+    // Modal Logic
+    function openModal(id) {
+        currentPedido = pedidos.find(p => p.id === id);
+        if(!currentPedido) return;
+
+        document.getElementById('modal-header-title').textContent = `Remisión #${currentPedido.numero_remision} — ${formatCOP(currentPedido.valor_pedido)}`;
+        
+        document.getElementById('radio-completo').checked = true;
+        document.getElementById('modal_error').style.display = 'none';
+        
+        handleRadioChange();
+        
+        document.getElementById('register-modal').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('register-modal').classList.remove('active');
+        currentPedido = null;
+    }
+
+    function handleRadioChange() {
+        const isCompleto = document.getElementById('radio-completo').checked;
+        const isParcial = document.getElementById('radio-parcial').checked;
+        const isNoPago = document.getElementById('radio-nopago').checked;
+
+        const blockValor = document.getElementById('block-valor');
+        const blockMetodo = document.getElementById('block-metodo');
+        const selectMetodo = document.getElementById('select-metodo');
+        const inputValor = document.getElementById('input-valor');
+        const debtText = document.getElementById('debt-text');
+
+        if(isCompleto) {
+            blockValor.style.display = 'none';
+            blockMetodo.style.display = 'block';
+            selectMetodo.innerHTML = '<option value="Efectivo">Efectivo</option><option value="Nequi">Nequi</option><option value="Transferencia">Transferencia</option><option value="Debe">Debe</option>';
+            selectMetodo.disabled = false;
+            selectMetodo.value = 'Efectivo';
+        } else if(isParcial) {
+            blockValor.style.display = 'block';
+            blockMetodo.style.display = 'block';
+            inputValor.value = '';
+            debtText.textContent = `Deuda: ${formatCOP(currentPedido.valor_pedido)}`;
+            selectMetodo.innerHTML = '<option value="Efectivo">Efectivo</option><option value="Nequi">Nequi</option><option value="Transferencia">Transferencia</option><option value="Debe">Debe</option>';
+            selectMetodo.disabled = false;
+            selectMetodo.value = 'Efectivo';
+            setTimeout(() => inputValor.focus(), 100);
+        } else if(isNoPago) {
+            blockValor.style.display = 'none';
+            blockMetodo.style.display = 'block';
+            selectMetodo.innerHTML = '<option value="Debe">Debe</option>';
+            selectMetodo.disabled = true;
+        }
+    }
+
+    function updateDebt() {
+        const val = parseFloat(document.getElementById('input-valor').value) || 0;
+        const debt = currentPedido.valor_pedido - val;
+        document.getElementById('debt-text').textContent = `Deuda: ${formatCOP(debt)}`;
+    }
+
+    async function confirmDelivery() {
+        const isCompleto = document.getElementById('radio-completo').checked;
+        const isParcial = document.getElementById('radio-parcial').checked;
+        const isNoPago = document.getElementById('radio-nopago').checked;
+        const errDiv = document.getElementById('modal_error');
+        errDiv.style.display = 'none';
+
+        let newState, newMetodo, newValorPagado;
+
+        if(isCompleto) {
+            newState = 'entregado_completo';
+            newMetodo = document.getElementById('select-metodo').value;
+            newValorPagado = currentPedido.valor_pedido;
+        } else if(isParcial) {
+            const val = parseFloat(document.getElementById('input-valor').value);
+            if(isNaN(val) || val < 0) {
+                errDiv.textContent = 'Ingresa un valor válido';
+                errDiv.style.display = 'block';
+                return;
+            }
+            if(val === 0) {
+                errDiv.textContent = 'El valor es $0, selecciona "No pagó"';
+                errDiv.style.display = 'block';
+                return;
+            }
+            if(val > currentPedido.valor_pedido) {
+                errDiv.textContent = 'El valor pagado no puede superar el total del pedido';
+                errDiv.style.display = 'block';
+                return;
+            }
+            newState = 'entregado_parcial';
+            newMetodo = document.getElementById('select-metodo').value;
+            newValorPagado = val;
+            
+            if(val == currentPedido.valor_pedido) {
+                newState = 'entregado_completo';
+            }
+        } else if(isNoPago) {
+            newState = 'entregado_parcial';
+            newMetodo = 'Debe';
+            newValorPagado = 0;
+        }
+
+        const btn = document.getElementById('btn-confirm');
+        btn.disabled = true;
+        btn.textContent = 'Confirmando...';
+
+        const now = new Date().toISOString();
+
+        try {
+            const payload = {
+                estado: newState,
+                metodo_pago: newMetodo,
+                valor_pagado: newValorPagado,
+                timestamp_entrega: now
+            };
+
+            const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?id=eq.${currentPedido.id}`, {
+                method: 'PATCH',
+                headers: postHeaders,
+                body: JSON.stringify(payload)
+            });
+
+            if(!res.ok) throw new Error('Error de red al registrar entrega');
+
+            const updatedData = await res.json();
+            
+            // Actualizar arreglo local
+            const index = pedidos.findIndex(p => p.id === currentPedido.id);
+            if(index !== -1 && updatedData.length > 0) {
+                pedidos[index] = updatedData[0];
+            }
+
+            closeModal();
+            renderPedidos();
+            updateSummary();
+
+        } catch(e) {
+            errDiv.textContent = e.message;
+            errDiv.style.display = 'block';
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Confirmar';
+        }
+    }
+
+    function updateSummary() {
+        // RESUMEN
+        let entregados = 0;
+        let recaudado = 0;
+        let pendientes = 0;
+
+        pedidos.forEach(p => {
+            if(p.estado !== 'pendiente') {
+                entregados++;
+                recaudado += parseFloat(p.valor_pagado) || 0;
+            } else {
+                pendientes++;
+            }
+        });
+
+        document.getElementById('summary-text').textContent = `✓ ${entregados} entregados · 💰 ${formatCOP(recaudado)} · ⏳ ${pendientes} pendientes`;
+    }
+</script>
+
+</body>
+</html>
