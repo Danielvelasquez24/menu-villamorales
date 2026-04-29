@@ -1,0 +1,6 @@
+{
+  "name": "menu-villamorales",
+  "scripts": {
+    "build": "echo 'Static site'"
+  }
+}
